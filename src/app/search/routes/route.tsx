@@ -2,9 +2,8 @@ import { useSearchParams } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 import supabase from "../../utils/supabaseClient";
 import { BsFileBreakFill } from "react-icons/bs";
-import TurndownService from "turndown"
 let igdbTwitchBearer = "";
-const turndownService = new TurndownService();
+
 
 async function getTwitchKeys() {
   const igdbIdKey = process.env.IGDB_ID_KEY;
@@ -71,7 +70,7 @@ async function handleBookSearch(body) {
           {
             api_id: book.api_id,
             title: book.title,
-            description: book.description ? turndownService.turndown(book.description) : "",
+            description: book.description ? book.description : "",
             cover: book.cover,
             creator: book.volumeInfo.authors?book.volumeInfo.authors[0]: "",
             type: "book",
@@ -149,6 +148,7 @@ async function handleVideoSearch(body) {
             description: video.description,
             cover: video.cover,
             type: "video",
+            video_type: video.media_type,
           },
         ])
         .select();

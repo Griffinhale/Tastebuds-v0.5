@@ -31,6 +31,9 @@ export async function POST(req: NextRequest) {
     case "album": results = await handleAlbumDetails(body); break;
     case "book": results = await handleBookDetails(body); break;
     case "game": results = await handleGameDetails(body); break;
+    case "video": results = await handleVideoDetails(body); break;
+    default: console.error("type of media missing");
+
   }
   
   
@@ -45,7 +48,7 @@ async function handleAlbumDetails(body){
     const searchURL = `http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=${process.env.LAST_FM_KEY}&artist=${body.artist}&album=${body.album}&format=json`;
     const response = await fetch(searchURL)
     const data = await response.json()
-    console.log(data.album.tracks);
+    console.log(data);
     return data;
 }
 
@@ -84,7 +87,7 @@ async function handleGameDetails(body) {
     
     const data = await response.json();
     console.log(data);
-    const bodyData2 =  `fields *; where changed_company_id=${data.involved_companies?data.involved_companies[0].id: ""};`
+    const bodyData2 =  `fields *; where changed_company_id=${data.involved_companies?data.involved_companies[0].id:""};`
     const url2 = "https://api.igdb.com/v4/companies";
     
     const response2 = await fetch(url2, {
@@ -104,4 +107,30 @@ async function handleGameDetails(body) {
   } catch (error) {
     console.log(error);
   }
+}
+
+async function handleVideoDetails(body) {
+  let searchURL: string = "";
+  const tmdbAuthHeader = process.env.TMDB_AUTH_HEADER
+  const tmdbApiKey = process.env.TMDB_API_KEY;
+  const options = {
+    method: "GET",
+    headers: {
+      accept: "application/json",
+      Authorization: "Bearer " + tmdbAuthHeader,
+    },
+  };
+  switch(body.video_type) {
+    case "tv":
+    searchURL =  `https://api.themoviedb.org/3/tv/${body.api_id}?api_key=${tmdbApiKey}&append_to_response=credits,keywords,recommendations,similar,watch_providers`;
+    break;
+    case "movie":
+    searchURL = `https://api.themoviedb.org/3/movie/${body.api_id}?api_key=${tmdbApiKey}&append_to_response=videos,credits,keywords,recommendations,similar`
+    break;
+  }
+  console.log(searchURL)
+  const response = await fetch(searchURL, options);
+  const data = await response.json();
+  console.log(data);
+  return data;
 }

@@ -457,6 +457,7 @@ const SearchResults = () => {
   useEffect(() => {
     // Get the new search parameter
     wipeResults();
+    
     const newTerm = params.get("term") || "bungus";
     // Update the state variable
     if (termRef.current !== newTerm) {

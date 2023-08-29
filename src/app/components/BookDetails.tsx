@@ -3,24 +3,11 @@ import { useEffect } from "react";
 import useState from "react-usestateref";
 import { BiCheckCircle, BiErrorCircle, BiPlusCircle } from "react-icons/bi";
 import supabase from "../utils/supabaseClient";
+import * as DOMPurify from "dompurify"
 import Header from "./Header";
 import extractDataFromCookie from "../utils/extractCookie";
-import TurndownService from "turndown";
-const turndownService = new TurndownService();
-// Add custom rules for <br> and <p>
-turndownService.addRule("break", {
-  filter: ["br", "br/", "br /"],
-  replacement: function (content, node, options) {
-    return "\n\n";
-  },
-});
 
-turndownService.addRule("paragraph", {
-  filter: "p",
-  replacement: function (content, node, options) {
-    return "\n\n" + content + "\n\n";
-  },
-});
+// Add custom rules for <br> and <p>
 
 const BookDetails = ({ params }: { params: [string] }) => {
   const [results, setResults, resultsRef] = useState([]);
@@ -29,6 +16,7 @@ const BookDetails = ({ params }: { params: [string] }) => {
   const [addedToLib, setAddedToLib, addedToLibRef] = useState(false);
   const [cover, setCover] = useState("");
   const [userId, setUserId, userIdRef] = useState("");
+  let dimensionStr: string = "";
 
   const addToLibrary = async () => {
     const { data: existingItem, error: existingItemError } = await supabase
@@ -63,6 +51,31 @@ const BookDetails = ({ params }: { params: [string] }) => {
       }
     }
   };
+  function selectDimensionStyle() {
+    console.log(Object.keys(resultsRef.current.volumeInfo.dimensions));
+    switch(Object.keys(resultsRef.current.volumeInfo.dimensions).length) {
+        case 1: 
+          switch(Object.keys(resultsRef.current.volumeInfo.dimensions)[0]){
+            case "height": return "Height of " + resultsRef.current.volumeInfo.dimensions.height; break;
+            case "width": return "Height of " + resultsRef.current.volumeInfo.dimensions.width; break;
+            case "thickness": return "Thickness of " + resultsRef.current.volumeInfo.dimensions.thickness; break;
+          }
+          break;
+        case 2:
+          switch(Object.keys(resultsRef.current.volumeInfo.dimensions)) {
+            case ["height", "width"]: return "Height of " + resultsRef.current.volumeInfo.dimensions.height + ", width of " + resultsRef.current.volumeInfo.dimensions.width; break;
+            case ["thickness", "width"]: return "Thickness of " + resultsRef.current.volumeInfo.dimensions.thickness + ", width of " + resultsRef.current.volumeInfo.dimensions.width; break;
+            case ["height", "thickness"]: return "Height of " + resultsRef.current.volumeInfo.dimensions.height + ", thickness of " + resultsRef.current.volumeInfo.dimensions.thickness; break;
+          }
+          break;
+        case 3:
+          return dimensionStr = "Height of " + resultsRef.current.volumeInfo.dimensions.height + ", width of " + resultsRef.current.volumeInfo.dimensions.width + ", thickness of " + resultsRef.current.volumeInfo.dimensions.thickness; break;
+          break;
+        default: 
+          return "No dimensions available";
+          break;
+        }
+  }
 
   useEffect(() => {
     const data = extractDataFromCookie();
@@ -89,9 +102,7 @@ const BookDetails = ({ params }: { params: [string] }) => {
       );
       const data = await response.json();
       console.log(data);
-      data.volumeInfo.description = turndownService.turndown(
-        data.volumeInfo.description
-      );
+      data.volumeInfo.description = {__html: DOMPurify.sanitize(data.volumeInfo.description)};
       console.log(data.volumeInfo.description);
       setResults(data);
       setIsLoading(false);
@@ -108,17 +119,7 @@ const BookDetails = ({ params }: { params: [string] }) => {
       
       {/*Main Content*/}
       <div className="bg-quartiary/80 border-t-8 border-primary px-8 py-8 mt-1 rounded-xl text-black">
-        <div className="border-b-2 h-auto border-primary rounded-xl">
-          <div className="flex-row flex">
-            <h1 className="font-bold text-xl pb-4 ml-4">
-              Results for &quot;
-              {isLoadingRef.current
-                ? "loading"
-                : resultsRef.current.volumeInfo.title}
-              &quot;
-            </h1>
-          </div>
-        </div>
+        
 
         {/*Info*/}
         {isLoadingRef.current ? (
@@ -156,8 +157,8 @@ const BookDetails = ({ params }: { params: [string] }) => {
               </button>
             </div>
             <div className="border-primary w-4/5 border-2 p-4">
-              <p className="whitespace-pre-line">
-                {resultsRef.current.volumeInfo.description}
+              <p className="whitespace-pre-line" dangerouslySetInnerHTML={resultsRef.current.volumeInfo.description}>
+                
               </p>
             </div>
             <div className="border-primary flex-col flex justify-between w-4/5 border-2 p-4">
@@ -174,9 +175,7 @@ const BookDetails = ({ params }: { params: [string] }) => {
               <div>
                 <p>Page count: {resultsRef.current.volumeInfo.pageCount}</p>
                 <p>
-                  Dimensions: {resultsRef.current.volumeInfo.dimensions?.height}{" "}
-                  tall, {resultsRef.current.volumeInfo.dimensions?.width} wide,
-                  and {resultsRef.current.volumeInfo.dimensions?.thickness} thick
+                  Dimensions: {resultsRef.current.volumeInfo.hasOwnProperty("dimensions")?selectDimensionStyle():"No Dimensions Available"}
                 </p>
                 <p>
                   Date Published: {resultsRef.current.volumeInfo.publishedDate}

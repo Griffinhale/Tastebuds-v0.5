@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import useState from "react-usestateref";
 import { BiCheckCircle, BiErrorCircle, BiPlusCircle } from "react-icons/bi";
 import supabase from "../utils/supabaseClient";
-import Header from "./Header";
 import extractDataFromCookie from "../utils/extractCookie";
 
 const GameDetails = ({ params }: { params: [string] }) => {
@@ -87,17 +86,7 @@ const GameDetails = ({ params }: { params: [string] }) => {
       
       {/*Main Content*/}
       <div className="bg-quartiary/80 border-t-8 border-primary px-8 py-8 mt-1 rounded-xl text-black">
-        <div className="border-b-2 h-auto border-primary rounded-xl">
-          <div className="flex-row flex">
-            <h1 className="font-bold text-xl pb-4 ml-4">
-              Results for &quot;
-              {isLoadingRef.current
-                ? "loading"
-                : resultsRef.current.name}
-              &quot;
-            </h1>
-          </div>
-        </div>
+        
 
         {/*Info*/}
         {isLoadingRef.current ? (
@@ -142,9 +131,9 @@ const GameDetails = ({ params }: { params: [string] }) => {
               </div>
               <div>
                 <h2>Genres:</h2>
-              {resultsRef.current.genres.map((genre) => {
-                return <p>{genre.name}</p>
-              })}
+              {resultsRef.current.genres?resultsRef.current.genres.map((genre, index) => {
+                return <p key={index}>{genre.name}</p>
+              }):null}
               </div>
             </div>
           </div>

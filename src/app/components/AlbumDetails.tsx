@@ -9,6 +9,12 @@ const AlbumDetails = ({ params }: { params: { itemId: string } }) => {
   const [isLoading, setIsLoading, isLoadingRef] = useState(true);
   const [cover, setCover] = useState("");
 
+  function selectAlbumType() {
+    console.log();
+    console.log(resultsRef.current.album);
+    console.log(typeof resultsRef.current.album === "object");
+  }
+
   useEffect(() => {
     async function getAlbumDetails(item_id: string) {
       const { data: albumDetails, error: albumDetailsError } = await supabase
@@ -40,6 +46,7 @@ const AlbumDetails = ({ params }: { params: { itemId: string } }) => {
     }
     console.log(params);
     getAlbumDetails(params[1]);
+    selectAlbumType();
   }, []);
 
   return (
@@ -48,15 +55,7 @@ const AlbumDetails = ({ params }: { params: { itemId: string } }) => {
 
       {/*Main Content*/}
       <div className="bg-quartiary/80 border-t-8 border-primary px-8 py-8 mt-1 rounded-xl text-black">
-        <div className="border-b-2 h-auto border-primary rounded-xl">
-          <div className="flex-row flex">
-            <h1 className="font-bold text-xl pb-4 ml-4">
-              Results for &quot;
-              {isLoadingRef.current ? "loading" : resultsRef.current.album.name}
-              &quot;
-            </h1>
-          </div>
-        </div>
+        
 
         {/*Info*/}
         {isLoadingRef.current ? (
@@ -78,7 +77,7 @@ const AlbumDetails = ({ params }: { params: { itemId: string } }) => {
                 <ol>
                   <h2 className="text-xl font-semibold mb-8">Track listing</h2>
                   {/*TODO: ADD STATE THAT CHANGES BASED OFF IF ALBUM IS SINGLE OR MULTIPLE TRACKS OR NO TRACKS LISTED TO RENDER CORRECT DETAILS*/}
-                  {resultsRef.current.album.tracks.track.length ? (
+                  {resultsRef.current.album.tracks?.track.length ? (
                     resultsRef.current.album.tracks.track.map(
                       (result, index) => {
                         return (
@@ -104,25 +103,36 @@ const AlbumDetails = ({ params }: { params: { itemId: string } }) => {
                     <li className="flex flex-row justify-between">
                       <div>
                         1.{" "}
-                        <a href={resultsRef.current.album.tracks.track.url}>
-                          {resultsRef.current.album.tracks.track.name}
+                        <a
+                          href={
+                            resultsRef.current.album.tracks
+                              ? resultsRef.current.album.tracks.track.url
+                              : resultsRef.current.album.url
+                          }
+                        >
+                          {resultsRef.current.album.tracks
+                            ? resultsRef.current.album.tracks.track.name
+                            : resultsRef.current.album.name}
                         </a>
                       </div>
-                      <div className="w/1/5">
-                        RUNTIME:{" "}
-                        {Math.floor(
-                          resultsRef.current.album.tracks.track.duration / 60
-                        )}
-                        :
-                        {resultsRef.current.album.tracks.track.duration % 60 <
-                        10
-                          ? `0${
-                              resultsRef.current.album.tracks.track.duration %
-                              60
-                            }`
-                          : resultsRef.current.album.tracks.track.duration %
-                            60}{" "}
-                      </div>
+                      {resultsRef.current.album &&
+                      resultsRef.current.album.tracks ? (
+                        <div className="w/1/5">
+                          RUNTIME:{" "}
+                          {Math.floor(
+                            resultsRef.current.album.tracks.track.duration / 60
+                          )}
+                          :
+                          {resultsRef.current.album.tracks.track.duration % 60 <
+                          10
+                            ? `0${
+                                resultsRef.current.album.tracks.track.duration %
+                                60
+                              }`
+                            : resultsRef.current.album.tracks.track.duration %
+                              60}
+                        </div>
+                      ) : null}
                     </li>
                   )}
                 </ol>
