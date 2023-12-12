@@ -5,21 +5,28 @@ import { BiCheckCircle, BiErrorCircle, BiPlusCircle } from "react-icons/bi";
 import supabase from "../utils/supabaseClient";
 import extractDataFromCookie from "../utils/extractCookie";
 
+// Component for displaying details of a video
 const VideoDetails = ({ params }: { params: [string] }) => {
+  // State management for video details, loading status, library status, etc.
   const [results, setResults, resultsRef] = useState([]);
   const [isLoading, setIsLoading, isLoadingRef] = useState(true);
   const [alreadyInLib, setAlreadyInLib, alreadyInLibRef] = useState(false);
   const [addedToLib, setAddedToLib, addedToLibRef] = useState(false);
   const [cover, setCover] = useState("");
   const [userId, setUserId, userIdRef] = useState("");
+
+  // Function to add a video to the user's library
   const addToLibrary = async () => {
+    // Check if the video is already in the user's library
     const { data: existingItem, error: existingItemError } = await supabase
       .from("library")
       .select("*")
       .eq("user_id", userIdRef.current);
+
     let isInUserLibrary = false;
     if (existingItem) {
       console.log("check library");
+      // Filter to check if the video is already in the library
       const filtered = existingItem.filter(
         (item) => item.item_id === params[1]
       );
@@ -32,10 +39,13 @@ const VideoDetails = ({ params }: { params: [string] }) => {
     } else if (error) {
       console.log(error);
     }
+
+    // If the video is not in the library, add it
     if (isInUserLibrary === false) {
       console.log("adding to library");
       console.log(params[1]);
       setAddedToLib(true);
+      // Insert the video into the user's library
       const { error } = await supabase.from("library").insert({
         item_id: params[1],
         user_id: userId,
@@ -46,25 +56,37 @@ const VideoDetails = ({ params }: { params: [string] }) => {
     }
   };
 
+  // useEffect hook to load video details on component mount
   useEffect(() => {
+    // Extract user data from cookie
     const data = extractDataFromCookie();
+    if (data) {
+      console.log("UserId:", data.userId);
+      console.log("ScreenName:", data.screenName);
+      setUserId(data.userId);
+    } else {
+      console.log("auth_data not found in cookie");
+      setUserId("");
+    }
 
-    setUserId(data.userId);
-
+    // Function to fetch video details
     async function getVideoDetails(item_id: string) {
+      // Fetch video details from the database
       const { data: videoDetails, error: videoDetailsError } = await supabase
         .from("items")
         .select("*")
         .eq("id", item_id);
 
       console.log(videoDetails[0]);
-      setCover(videoDetails[0].cover);
+      setCover(videoDetails[0].cover); // Set cover image
 
+      // Prepare data for additional details fetch
       const bodyData = {
         type: params[0],
         api_id: videoDetails[0].api_id,
         video_type: videoDetails[0].video_type,
       };
+      // Fetch additional details
       const response = await fetch(
         "/details/" + params[0] + "/" + params[1] + "/routes",
         {
@@ -77,13 +99,14 @@ const VideoDetails = ({ params }: { params: [string] }) => {
       );
       let data = await response.json();
       data.video_type = videoDetails[0].video_type;
-      setResults(data);
-      setIsLoading(false);
-      console.log(resultsRef.current);
+      setResults(data); // Set the results state
+      setIsLoading(false); // Set loading to false
+      console.log(resultsRef.current); // Log the results for debugging
     }
-    console.log(params);
-    getVideoDetails(params[1]);
-  }, []);
+    console.log(params); // Log params for debugging
+    getVideoDetails(params[1]); // Call the function to get video details
+  }, []); // Empty dependency array ensures this effect runs only once on mount
+
   if (resultsRef.current.video_type === "tv") {
     return (
       <div className="flex flex-col h-4/5 min-h-[1200px] w-full rounded-xl text-primary">

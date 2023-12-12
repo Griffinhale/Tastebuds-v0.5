@@ -13,31 +13,36 @@ import { FaRankingStar } from "react-icons/fa6";
 import { MdForum } from "react-icons/md";
 
 const LeftSidebar = () => {
-  const [isClicked, setIsClicked] = useState(false);
-  const [showIcon, setShowIcon] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const inputRef = useRef();
+  
+  const [isClicked, setIsClicked] = useState(false); // State for tracking if search button currently clicked
+  const [showIcon, setShowIcon] = useState(true); // State for controlling visibility of search icon
+  const [searchTerm, setSearchTerm] = useState(""); // State for holding search term
+  const inputRef = useRef(); // useRef hook to create a reference for the input field
+
+  // useRouter hook from Next.js to handle routing
   const router = useRouter();
 
+  // Function to reset the search field
   const resetSearchField = () => {
-    setSearchTerm("");
-    setIsClicked(false);
-    setShowIcon(true);
-    inputRef.current.blur();
+    setSearchTerm(""); 
+    setIsClicked(false); 
+    setShowIcon(true); 
+    inputRef.current.blur(); // Remove focus from the input field
   };
 
+  // Function to handle the submission of the search form
   const handleSubmit = (event) => {
-    event.preventDefault();
-    router.push(`/search?term=${encodeURIComponent(searchTerm)}`);
-    
-    resetSearchField();
+    event.preventDefault(); 
+    router.push(`/search?term=${encodeURIComponent(searchTerm)}`); 
+
+    resetSearchField(); // Reset the search field after submitting
   };
 
+  // Function to handle random media selection
   const handleRandomClick = () => {
-    console.log("random")
-    router.replace("/random");
+    console.log("random"); // Log 'random' to the console for debugging
+    router.replace("/random"); // Use router.replace to navigate to the random page without adding the navigation to the history stack
   }
-
   return (
     <div className="flex text-black">
       <div className="sticky w-[300px] h-screen top-[0px] py-12">

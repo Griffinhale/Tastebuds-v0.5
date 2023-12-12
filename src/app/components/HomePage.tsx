@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Header from "./Header"
-
+//homepage layout, currently a placeholder
 const HomePage = () => {
   return (
     <div className="flex flex-col h-4/5 min-h-[1200px] w-full rounded-xl text-primary">

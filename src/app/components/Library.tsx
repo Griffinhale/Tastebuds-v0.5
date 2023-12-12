@@ -6,19 +6,26 @@ import Header from "./Header";
 import supabase from "../utils/supabaseClient";
 import extractDataFromCookie from "../utils/extractCookie";
 
+// Define a component to display an item in a library
 const LibraryItem = ({ result }) => {
+  // State to manage modal visibility
   const [isModalOpen, setIsModalOpen, isModalOpenRef] = useState(false);
   
+  // Function to close the modal
   const handleCloseModal = () => {
     setIsModalOpen(false);
     console.log("closed modal");
   };
+
+  // Function to open the modal
   const handleOpenModal = () => {
     setIsModalOpen(true);
     console.log("opened");
   };
 
+  // Function to get button style based on the type of item
   const getButtonStyle = (type) => {
+    // Return specific styles for different item types
     if (type === "book") {
       return "items-center justify-center h-80 flex flex-col  mx-2 px-2 hover:ring-4 rounded-full relative bg-red-500/30";
     } else if (type === "album") {
@@ -29,7 +36,10 @@ const LibraryItem = ({ result }) => {
       return "items-center justify-center h-80 flex flex-col mx-2 px-2  hover:ring-4 rounded-full relative bg-slate-500/30";
     }
   };
+
+  // Function to get image style based on the type of item
   const getImgStyle = (type) => {
+    // Return specific styles for different item types
     if (type === "book") {
       return "w-45 h-60 rounded-xl overflow-hidden";
     } else if (type === "album") {
@@ -40,6 +50,8 @@ const LibraryItem = ({ result }) => {
       return "w-45 h-60 rounded-xl overflow-hidden";
     }
   };
+
+  // Render a button for each item, with modal to show more details
   return (
     <div className="py-4">
       <button
@@ -68,10 +80,13 @@ const LibraryItem = ({ result }) => {
   );
 };
 
+// Define a component to display a library of items
 const Library = () => {
+  // State for storing library items and user ID
   const [results, setResults, resultsRef] = useState([]);
   const [userId, setUserId, userIdRef] = useState("");
 
+  // Function to fetch library data from the database
   async function getLib(user_id) {
     const { data, error } = await supabase
       .from("library")
@@ -85,23 +100,21 @@ const Library = () => {
     return data;
   }
 
+  // useEffect hook to load data when the component mounts
   useEffect(() => {
+    // Extract user data from cookies
     const data = extractDataFromCookie();
     if (data) {
       console.log("UserId:", data.userId);
       console.log("ScreenName:", data.screenName);
-       const lib = getLib(data.userId);
+      // Fetch library data for the user
+      const lib = getLib(data.userId);
       setUserId(data.userId);
     } else {
       console.log("auth_data not found in cookie");
       setUserId("");
     }
-
-   
-
-   
-  }, []);
-
+  }, []); // Empty dependency array ensures this effect runs only once on mount
   return (
     <div className="flex flex-col h-4/5 min-h-[1200px] w-full rounded-xl text-primary">
       {/*Header*/}

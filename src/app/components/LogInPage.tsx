@@ -1,13 +1,17 @@
-import {useEffect} from "react";
+import { useEffect } from "react";
 import Header from "./Header";
 import supabase from "../utils/supabaseClient";
 
+// Define a component for the login page
 const LogInPage = () => {
+  // Function to handle user sign up
   const handleSignup = async (e) => {
-    e.preventDefault(); // Prevent the default form submission
+    e.preventDefault(); // Prevent the default form submission behavior
 
+    // Get form data
     const form = e.target;
     const formData = new FormData(form);
+    // Construct a JSON body with the form data
     const body = JSON.stringify({
       screen_name: formData.get("screen_name"),
       email: formData.get("email"),
@@ -15,6 +19,7 @@ const LogInPage = () => {
       type: "signup",
     });
 
+    // Send a POST request to the server to handle the signup
     const res = await fetch("http://localhost:3000/login/routes", {
       method: "POST",
       headers: {
@@ -22,18 +27,23 @@ const LogInPage = () => {
       },
       body: body,
     });
-    const data = await res.json();
-    console.log(data);
+    const data = await res.json(); // Parse the response
+    console.log(data); // Log the response data for debugging
   };
+
+  // Function to handle user login
   const handleLogin = async (e) => {
+    // Get form data
     const form = e.target;
     const formData = new FormData(form);
+    // Construct a JSON body with the form data
     const body = JSON.stringify({
       email: formData.get("email"),
       password: formData.get("password"),
       type: "login"
-    })
+    });
 
+    // Send a POST request to the server to handle the login
     const res = await fetch("http://localhost:3000/login/routes", {
       method: "POST",
       headers: {
@@ -41,18 +51,20 @@ const LogInPage = () => {
       },
       body: body,
     })
-    const data = await res.json();
-    console.log(data.data.session);
+    const data = await res.json(); // Parse the response
+    console.log(data.data.session); // Log the session data for debugging
   };
 
+  // useEffect hook to check the login status when the component mounts
   useEffect(() => {
     async function checkLogin() {
+      // Use Supabase client to check the current session
       const { data, error } = await supabase.auth.getSession()
-      console.log(error)
+      console.log(error); // Log any errors for debugging
     }
     
-    checkLogin();
-  })
+    checkLogin(); // Call the checkLogin function
+  }) // Missing dependency array, which might cause this effect to run on every re-render
 
   return (
     <div className="flex flex-col h-4/5 min-h-[1200px] w-full rounded-xl text-primary">

@@ -8,31 +8,38 @@ import Header from "./Header";
 import { useRouter, useSearchParams } from "next/navigation";
 import supabase from "../utils/supabaseClient";
 import SearchModal from "./SearchModal";
+import extractDataFromCookie from "../utils/extractCookie"
 
+// Define a SearchResult component
 const SearchResult = ({ result, userId }) => {
+  // State management for modal and library status
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [alreadyInLib, setAlreadyInLib, alreadyInLibRef] = useState(false);
   const [addedToLib, setAddedToLib, addedToLibRef] = useState(false);
-  
-  
 
+  // Function to open the modal
   const handleOpenModal = () => {
     setIsModalOpen(true);
     console.log("opened");
   };
 
+  // Function to close the modal
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
 
+  // Function to add an item to the user's library
   const addToLibrary = async () => {
+    // Check if the item is already in the user's library
     const { data: existingItem, error: existingItemError } = await supabase
       .from("library")
       .select("*")
       .eq("user_id", userId);
+
     let isInUserLibrary = false;
     if (existingItem) {
       console.log("check library");
+      // Filter to check if the item is already in the library
       const filtered = existingItem.filter(
         (item) => item.item_id === result.id
       );
@@ -45,10 +52,13 @@ const SearchResult = ({ result, userId }) => {
     } else if (error) {
       console.log(error);
     }
+
+    // If the item is not in the library, add it
     if (isInUserLibrary === false) {
       console.log("adding to library");
       console.log(result.id);
       setAddedToLib(true);
+      // Insert the item into the user's library
       const { error } = await supabase.from("library").insert({
         item_id: result.id,
         user_id: userId,
@@ -59,7 +69,9 @@ const SearchResult = ({ result, userId }) => {
     }
   };
 
+  // Function to get button style based on the item type
   const getButtonStyle = (type) => {
+    // Returns specific styles for different item types
     if (type === "book") {
       return "items-center justify-center w-full h-80 flex flex-col hover:ring-4 rounded-full relative bg-red-500/30";
     } else if (type === "album") {
@@ -71,7 +83,9 @@ const SearchResult = ({ result, userId }) => {
     }
   };
 
+  // Function to get image style based on the item type
   const getImgStyle = (type) => {
+    // Returns specific styles for different item types
     if (type === "book") {
       return "w-45 h-60 rounded-xl overflow-hidden";
     } else if (type === "album") {
@@ -84,6 +98,7 @@ const SearchResult = ({ result, userId }) => {
   };
 
 
+  // Render a button with the item, a button to add to library, and a search modal
   return (
     <div className="py-4">
       <button onClick={handleOpenModal} className={getButtonStyle(result.type)}>
@@ -120,361 +135,346 @@ const SearchResult = ({ result, userId }) => {
 };
 
 const SearchResults = () => {
+  // State management for search results, loading status, and other variables
   const [results, setResults, resultsRef] = useState([]);
   const [isLoading, setIsLoading, isLoadingRef] = useState(false);
   const [category, setCategory, categoryRef] = useState("Your Library");
   const [userId, setUserId, userIdRef] = useState("");
-  const [page, setPage, pageRef] = useState(0 | Number);
-  const [endOfResults, setEndofResults, endOfResultsRef] = useState(false);
-  const router = useRouter();
-  const [IGDBTwitchBearer, setIGDBTwitchBearer, IGDBTwitchBearerRef] =
-    useState("");
-  const params = useSearchParams();
-  const [term, setTerm, termRef] = useState(
-    useSearchParams().get("term") || "bungus"
-  );
+  const [page, setPage, pageRef] = useState(0 | Number); // Initialize page number
+  const [endOfResults, setEndofResults, endOfResultsRef] = useState(false); // To track if there are more results to load
+  const router = useRouter(); // useRouter hook for navigation
+  const [IGDBTwitchBearer, setIGDBTwitchBearer, IGDBTwitchBearerRef] = useState(""); // State for bearer token (not used in this part)
+  const params = useSearchParams(); // Get search parameters
+  const [term, setTerm, termRef] = useState(useSearchParams().get("term") || "bungus"); // Search term state
 
-  //clear db
+  // Function to clear database tables (for administrative purposes)
   const clearItems = async () => {
     try {
-        // Truncate library table
+        // Truncate library, books, and items tables in the database
         let { error: error1 } = await supabase.rpc('truncate_library');
-
-        // Truncate books table
         let { error: error2 } = await supabase.rpc('truncate_details');
-
-        // Truncate items table for books
         let { error: error3 } = await supabase.rpc('truncate_items');
 
+        // Log errors if any occur during the truncation process
         if (error1 || error2 || error3) {
             console.error("Error clearing items: ", error1, error2, error3);
         }
     } catch (error) {
         console.error("Unexpected error: ", error);
     }
-};
+  };
 
-  //resets results state to blank array
+  // Function to reset the results state to an empty array
   const wipeResults = async () => {
     setResults([]);
     console.log("wiping results");
   };
 
-  //book functions
+  // Callback function for handling book category selection
   const handleBooksClick = useCallback(async () => {
-    setIsLoading(true);
-    setResults([]);
-    setEndofResults(false);
-    setCategory("Books");
-    console.log(categoryRef.current);
-    console.log(isLoadingRef.current);
-    fetchBooks();
-  }, [term, category]);
+    setIsLoading(true); // Set loading to true
+    setResults([]); // Clear current results
+    setEndofResults(false); // Reset end of results state
+    setCategory("Books"); // Set the category to 'Books'
+    console.log(categoryRef.current); // Log the current category for debugging
+    console.log(isLoadingRef.current); // Log the loading status for debugging
+    fetchBooks(); // Call function to fetch books
+  }, [term, category]); // Dependencies of the useCallback
 
+  // Function to fetch books based on the search term and page number
   const fetchBooks = useCallback(async () => {
+    // Check if the end of results has not been reached
     if (endOfResultsRef.current === false) {
       try {
+        // Make a POST request to fetch books
         const response = await fetch("/search/routes", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            term: termRef.current,
-            page: pageRef.current,
-            type: "book",
+            term: termRef.current, // Use current search term
+            page: pageRef.current, // Use current page number
+            type: "book", // Specify type as 'book'
           }),
         });
-        const data = await response.json();
-        console.log(data);
-        
+        const data = await response.json(); // Parse the response JSON
+        console.log(data); // Log the data for debugging
+
+        // Check if items are returned in the response
         if (data[0].items !== false) {
-          console.log(data);
+          console.log(data); // Log the data for debugging
           setResults((prevResults: any[]) => {
+            // Filter out duplicate items and append new data
             const uniqueData = data.filter(
               (d) => !prevResults.some((p) => p.api_id === d.api_id)
             );
-            return [...prevResults, ...uniqueData];
+            return [...prevResults, ...uniqueData]; // Update the results state
           });
-          setIsLoading(false);
+          setIsLoading(false); // Set loading to false
         } else {
-          setEndofResults(true);
-          setIsLoading(false);
+          setEndofResults(true); // Set end of results to true if no more items
+          setIsLoading(false); // Set loading to false
         }
       } catch (error) {
-        console.error("Error fetching data: ", error);
-        setIsLoading(false);
+        console.error("Error fetching data: ", error); // Log any errors
+        setIsLoading(false); // Set loading to false in case of error
       }
     }
-  }, []);
+  }, []); // No dependencies in useCallback
 
-  //album functions
-  const handleMusicClick = useCallback(() => {
-    setPage(1);
-    setResults([]);
-    setIsLoading(true);
-    setEndofResults(false);
-    setCategory("Albums");
-    console.log(categoryRef.current);
-    console.log(isLoadingRef.current);
-    fetchAlbums();
-  }, [term, category]);
+  // Functions related to handling album category
+const handleMusicClick = useCallback(() => {
+  setPage(1); // Reset the page number
+  setResults([]); // Clear current results
+  setIsLoading(true); // Indicate that loading is in progress
+  setEndofResults(false); // Reset end of results state
+  setCategory("Albums"); // Set the current category to 'Albums'
+  console.log(categoryRef.current); // Log the current category for debugging
+  console.log(isLoadingRef.current); // Log the loading status for debugging
+  fetchAlbums(); // Call the function to fetch albums
+}, [term, category]); // Dependencies for useCallback
 
-  const fetchAlbums = useCallback(async () => {
-      
-    try {
-      const results = await fetch('search/routes', {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          term: termRef.current,
-          page: pageRef.current,
-          type: "album",
-        }),
-      });
-      const data = await results.json();
-      if (data[0].items === false) {
-        setEndofResults(true);
-        setIsLoading(false);
-      
-      } else {
-        console.log(data);
-      setResults((prevResults: any[]) => {
-        const uniqueData = data.filter(
-          (d) => !prevResults.some((p) => p.id === d.id)
-        );
-        return [...prevResults, ...uniqueData];
-      });
-      setIsLoading(false);
-      }
-    } catch (error) {
-      console.error("Error fetching data: ", error);
-      setIsLoading(false);
-    }
-  }, [term]);
-
-  //video functions
-  const handleVideoClick = useCallback(() => {
-    setPage(1);
-    setResults([]);
-    setIsLoading(true);
-    setEndofResults(false);
-    setCategory("Videos");
-    console.log(categoryRef.current);
-    console.log(isLoadingRef.current);
-    fetchVideos();
-  }, [term, category]);
-
-  const fetchVideos = useCallback(async () => {
-    const url = `https://api.themoviedb.org/3/search/multi?query=${termRef.current}&include_adult=false&language=en-US&page=${pageRef.current}`;
-    console.log(
-      "TMDB API call:",
-      isLoadingRef.current,
-      "page",
-      pageRef.current,
-      "URL",
-      `https://api.themoviedb.org/3/search/multi?query=${termRef.current}&include_adult=false&language=en-US&page=${pageRef.current}`
-    );
-      
+// Function to fetch album data
+const fetchAlbums = useCallback(async () => {
+  try {
+    // Make a POST request to fetch albums
     const results = await fetch('search/routes', {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        term: termRef.current,
-        page: pageRef.current,
-        type: "video",
+        term: termRef.current, // Use the current search term
+        page: pageRef.current, // Use the current page number
+        type: "album", // Specify type as 'album'
       }),
     });
-    const data = await results.json();
-    if(data[0].items === false) {
-      setIsLoading(false);
-      setEndofResults(true);
+    const data = await results.json(); // Parse the response JSON
+    // Check if items are returned in the response
+    if (data[0].items === false) {
+      setEndofResults(true); // Set end of results to true if no more items
+      setIsLoading(false); // Set loading to false
     } else {
-      console.log(data);
+      console.log(data); // Log the data for debugging
+      setResults((prevResults: any[]) => {
+        // Filter out duplicate items and append new data
+        const uniqueData = data.filter(
+          (d) => !prevResults.some((p) => p.id === d.id)
+        );
+        return [...prevResults, ...uniqueData]; // Update the results state
+      });
+      setIsLoading(false); // Set loading to false
+    }
+  } catch (error) {
+    console.error("Error fetching data: ", error); // Log any errors
+    setIsLoading(false); // Set loading to false in case of error
+  }
+}, [term]); // Dependencies for useCallback
+
+// Functions related to handling video category
+const handleVideoClick = useCallback(() => {
+  setPage(1); // Reset the page number
+  setResults([]); // Clear current results
+  setIsLoading(true); // Indicate that loading is in progress
+  setEndofResults(false); // Reset end of results state
+  setCategory("Videos"); // Set the current category to 'Videos'
+  console.log(categoryRef.current); // Log the current category for debugging
+  console.log(isLoadingRef.current); // Log the loading status for debugging
+  fetchVideos(); // Call the function to fetch videos
+}, [term, category]); // Dependencies for useCallback
+
+// Function to fetch video data
+const fetchVideos = useCallback(async () => {
+  // Construct the URL for the video data API
+  const url = `https://api.themoviedb.org/3/search/multi?query=${termRef.current}&include_adult=false&language=en-US&page=${pageRef.current}`;
+  console.log("TMDB API call:", isLoadingRef.current, "page", pageRef.current, "URL", url);
+
+  // Make a POST request to fetch videos
+  const results = await fetch('search/routes', {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      term: termRef.current, // Use the current search term
+      page: pageRef.current, // Use the current page number
+      type: "video", // Specify type as 'video'
+    }),
+  });
+  const data = await results.json(); // Parse the response JSON
+  // Check if items are returned in the response
+  if(data[0].items === false) {
+    setIsLoading(false); // Set loading to false
+    setEndofResults(true); // Set end of results to true if no more items
+  } else {
+    console.log(data); // Log the data for debugging
     setResults((prevResults: any[]) => {
+      // Filter out duplicate items and append new data
       const uniqueData = data.filter(
         (d) => !prevResults.some((p) => p.id === d.id)
       );
-      return [...prevResults, ...uniqueData];
+      return [...prevResults, ...uniqueData]; // Update the results state
     });
-    setIsLoading(false);
-    }
-    
-  }, [term]);
+    setIsLoading(false); // Set loading to false
+  }
+}, [term]); // Dependencies for useCallback
 
-
-
-  //games functions
-  const fetchGames = useCallback(async () => {
-    try {
-      console.log("server call");
-      const res = await fetch("http://localhost:3000/search/routes", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          term: termRef.current,
-          page: pageRef.current, 
-          type: "game",
-        }),
-      });
-
-      if (!res.ok) {
-        console.error("Error fetching games:", res.status, res.statusText);
-        return;
-      }
-
-      const data = await res.json();
-      console.log(data);
-      setResults(data);
-      setIsLoading(false);
-    } catch (error) {
-      console.error("An error occurred:", error);
-    }
-  }, [term]);
-
-  const handleGamesClick = useCallback(async () => {
-    setPage(1);
-    setResults([]);
-    setIsLoading(true);
-    setEndofResults(false);
-    setCategory("Games");
-    console.log(categoryRef.current);
-    console.log(isLoadingRef.current);
-    fetchGames();
-    console.log("games fetched");
-  }, [term, category, fetchGames]);
-
-  //library results
-  const fetchLibraryResults = useCallback(async () => {
-    setCategory("Your Library");
-    setEndofResults(false);
-    console.log(categoryRef.current + ":");
-    setResults([]);
-    console.log(resultsRef);
-    let { data, error } = await supabase
-      .from("items")
-      .select("*")
-      .textSearch("title", `${termRef.current.trim().split(" ").join("&")}`);
-    if (error) {
-      console.log("Error fetching data: ", error);
-      setResults([]);
-    } else setResults(data);
-    setIsLoading(false);
-  }, [category, term]);
-
-  //scroll stuff
-
-  const useDebounce = (func, delay) => {
-    const callback = useRef(func);
-
-    useEffect(() => {
-      callback.current = func;
-    }, [func]);
-
-    return useCallback(
-      (...args) => {
-        const currentCallback = callback.current;
-        clearTimeout(callback.current.timer);
-        callback.current.timer = setTimeout(() => {
-          currentCallback(...args);
-        }, delay);
+// Functions related to handling game category
+const fetchGames = useCallback(async () => {
+  try {
+    console.log("server call");
+    // Make a POST request to fetch games
+    const res = await fetch("http://localhost:3000/search/routes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-      [delay]
-    );
-  };
+      body: JSON.stringify({
+        term: termRef.current, // Use the current search term
+        page: pageRef.current, // Use the current page number
+        type: "game", // Specify type as 'game'
+      }),
+    });
 
-  const handleScroll = useCallback(() => {
-    if (
-      window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 &&
-      endOfResultsRef.current === false
-    ) {
-      console.log("should load new page");
-      if (categoryRef.current === "Books" && !isLoading) {
-        setPage(page + 1);
-        setIsLoading(true); // Add a condition to prevent the fetch when API request is still going
-        fetchBooks();
-      }
-      if (categoryRef.current === "Albums" && !isLoading) {
-        setPage(page + 1);
-        setIsLoading(true);// Add a condition to prevent the fetch when API request is still going
-        fetchAlbums();
-      }
-      if (categoryRef.current === "Videos" && !isLoading) {
-        setPage(page + 1);
-        setIsLoading(true); // Add a condition to prevent the fetch when API request is still going
-        fetchVideos();
-      }
+    if (!res.ok) {
+      console.error("Error fetching games:", res.status, res.statusText);
+      return;
     }
-  }, [category, isLoading]); // Add isLoading as dependency
 
-  const debouncedHandleScroll = useDebounce(handleScroll, 500);
+    const data = await res.json(); // Parse the response JSON
+    console.log(data); // Log the data for debugging
+    setResults(data); // Update the results state
+    setIsLoading(false); // Set loading to false
+  } catch (error) {
+    console.error("An error occurred:", error); // Log any errors
+  }
+}, [term]); // Dependencies for useCallback
 
-  550;
+const handleGamesClick = useCallback(async () => {
+  setPage(1); // Reset the page number
+  setResults([]); // Clear current results
+  setIsLoading(true); // Indicate that loading is in progress
+  setEndofResults(false); // Reset end of results state
+  setCategory("Games"); // Set the current category to 'Games'
+  console.log(categoryRef.current); // Log the current category for debugging
+  console.log(isLoadingRef.current); // Log the loading status for debugging
+  fetchGames(); // Call the function to fetch games
+  console.log("games fetched");
+}, [term, category, fetchGames]); // Dependencies for useCallback
+
+  // Function to fetch library results
+const fetchLibraryResults = useCallback(async () => {
+  setCategory("Your Library"); // Set current category to 'Your Library'
+  setEndofResults(false); // Reset end of results state
+  console.log(categoryRef.current + ":"); // Log the current category for debugging
+  setResults([]); // Clear current results
+  console.log(resultsRef); // Log results reference for debugging
+  // Fetch items from Supabase with text search
+  let { data, error } = await supabase
+    .from("items")
+    .select("*")
+    .textSearch("title", `${termRef.current.trim().split(" ").join("&")}`);
+  if (error) {
+    console.log("Error fetching data: ", error); // Log any errors
+    setResults([]); // Clear results in case of error
+  } else setResults(data); // Set fetched data as results
+  setIsLoading(false); // Set loading to false
+}, [category, term]); // Dependencies for useCallback
+
+// Custom debounce hook
+const useDebounce = (func, delay) => {
+  const callback = useRef(func); // useRef to store the function
 
   useEffect(() => {
-    function extractDataFromCookie() {
-      // Get the entire cookie string
-      const cookieString = document.cookie;
+    callback.current = func; // Update the current function
+  }, [func]); // Dependency on function
 
-      // Extract the auth_data value from the cookie string
-      const authDataMatch = cookieString.match(/auth_data=([^;]+)/);
-      if (!authDataMatch) return null;
+  return useCallback(
+    (...args) => {
+      const currentCallback = callback.current;
+      clearTimeout(callback.current.timer); // Clear previous timer
+      callback.current.timer = setTimeout(() => {
+        currentCallback(...args); // Call function after delay
+      }, delay);
+    },
+    [delay] // Dependency on delay
+  );
+};
 
-      // Decode the URI component to get the JSON string
-      const authDataJSON = decodeURIComponent(authDataMatch[1]);
-
-      // Parse the JSON string to get the object
-      const authDataObj = JSON.parse(authDataJSON);
-
-      // Extract the userId and screenName properties
-      const userId = authDataObj.userId;
-      const screenName = authDataObj.screenName;
-
-      return { userId, screenName };
+// Function to handle infinite scrolling
+const handleScroll = useCallback(() => {
+  // Check if the user has scrolled to near the bottom of the page
+  if (
+    window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 &&
+    endOfResultsRef.current === false
+  ) {
+    console.log("should load new page");
+    // Fetch more results based on the current category
+    if (categoryRef.current === "Books" && !isLoading) {
+      setPage(page + 1);
+      setIsLoading(true); // Prevent additional fetches during loading
+      fetchBooks();
     }
-    
-
-    const data = extractDataFromCookie();
-    if (data) {
-      setUserId(data.userId);
-    } else {
-      console.log("auth_data not found in cookie");
-      setUserId("");
+    if (categoryRef.current === "Albums" && !isLoading) {
+      setPage(page + 1);
+      setIsLoading(true); // Prevent additional fetches during loading
+      fetchAlbums();
     }
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener("scroll", debouncedHandleScroll);
-    return () => window.removeEventListener("scroll", debouncedHandleScroll);
-  }, [debouncedHandleScroll]);
-
-  useEffect(() => {
-    // Get the new search parameter
-    wipeResults();
-    
-    const newTerm = params.get("term") || "bungus";
-    // Update the state variable
-    if (termRef.current !== newTerm) {
-      console.log("changed term");
-      setTerm(newTerm);
+    if (categoryRef.current === "Videos" && !isLoading) {
+      setPage(page + 1);
+      setIsLoading(true); // Prevent additional fetches during loading
+      fetchVideos();
     }
-  }, [useSearchParams().get("term")]);
+  }
+}, [category, isLoading]); // Dependencies for useCallback
 
-  useEffect(() => {
-    setCategory("Your Library");
-    setPage(0);
-    console.log("component did mount, search query:", term);
-    if (term && categoryRef.current === "Your Library") {
-      setIsLoading(true);
-      fetchLibraryResults();
-    }
-  }, [termRef.current, setResults]);
+// Create a debounced version of handleScroll
+const debouncedHandleScroll = useDebounce(handleScroll, 500);
+
+// useEffect hook to extract user data from cookies
+useEffect(() => {
+  // Extract user data from cookies
+  const data = extractDataFromCookie();
+  if (data) {
+    setUserId(data.userId); // Set user ID from extracted data
+  } else {
+    console.log("auth_data not found in cookie");
+    setUserId(""); // Clear user ID if auth data not found
+  }
+}, []);
+
+// useEffect hook for handling scroll events
+useEffect(() => {
+  window.addEventListener("scroll", debouncedHandleScroll); // Add scroll event listener
+  return () => window.removeEventListener("scroll", debouncedHandleScroll); // Cleanup on unmount
+}, [debouncedHandleScroll]);
+
+// useEffect hook for handling search term changes
+useEffect(() => {
+  wipeResults(); // Clear current results
+  const newTerm = params.get("term") || "bungus"; // Get new search term
+  if (termRef.current !== newTerm) {
+    console.log("changed term");
+    setTerm(newTerm); // Update term state if it has changed
+  }
+}, [useSearchParams().get("term")]);
+
+// useEffect hook to initialize component based on search term
+useEffect(() => {
+  if (userIdRef.current !== "") {
+  setCategory("Your Library"); // Set initial category
+  setPage(0); // Set initial page number
+  console.log("component did mount, search query:", term);
+  if (term && categoryRef.current === "Your Library") {
+    setIsLoading(true); // Set loading state
+    fetchLibraryResults(); // Fetch results from library
+  }
+}
+else {
+  console.log("user not logged in, please select category");
+}
+}, [termRef.current, setResults]); // Dependencies for useEffect
 
   return (
     <div className="flex flex-col h-4/5 min-h-[1200px] w-full rounded-xl text-primary">
