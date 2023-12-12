@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
 }
 
 // Function to handle book search and insert new books into database
-async function handleBookSearch(body: { term: string; page: string | number }) {
+async function handleBookSearch(body: { term: string; page: number }) {
   // Function to insert a book into the database if it doesn't exist
   async function insertBook(book: {
     api_id: any;
@@ -166,7 +166,7 @@ async function handleBookSearch(body: { term: string; page: string | number }) {
   }
 }
 // Function to handle video search and insert new videos into database
-async function handleVideoSearch(body: { term: string; page: string }) {
+async function handleVideoSearch(body: { term: string; page: number }) {
   // Function to insert a video into the database if it doesn't exist
   async function insertVideo(video: {
     api_id: any;
@@ -233,7 +233,9 @@ async function handleVideoSearch(body: { term: string; page: string }) {
     // Fetch video data from TMDB API
     const response = await fetch(searchURL, options);
     const data = await response.json();
-    if (data) {
+    if (
+      data.results.filter((video) => video.media_type !== "person").length > 0
+    ) {
       const resultsPromises = data.results
         .filter((video: { poster_path: any }) => video.poster_path)
         .map(
@@ -272,7 +274,7 @@ async function handleVideoSearch(body: { term: string; page: string }) {
 }
 
 // Function to handle album search and insert new albums into database
-async function handleAlbumSearch(body: { term: string; page: string }) {
+async function handleAlbumSearch(body: { term: string; page: number }) {
   // Function to insert an album into the database if it doesn't exist
   async function insertAlbum(album: { cover: any; title: any; creator: any }) {
     try {
@@ -352,7 +354,7 @@ async function handleAlbumSearch(body: { term: string; page: string }) {
             album.creator = album.artist;
             album.type = "album";
             try {
-            album.id = await insertAlbum(album);
+              album.id = await insertAlbum(album);
             } catch (err) {
               console.log("problem with insert album");
             }
@@ -368,7 +370,7 @@ async function handleAlbumSearch(body: { term: string; page: string }) {
 }
 
 // Function to handle game search and insert new games into the database
-async function handleGameSearch(body: { term: any }) {
+async function handleGameSearch(body: { term: string; page: number }) {
   // Function to insert a game into the database if it doesn't exist
   async function insertGame(game: {
     api_id: any;
@@ -421,9 +423,20 @@ async function handleGameSearch(body: { term: any }) {
   // Construct the body data and URL for IGDB API search
   const igdbIdKey = process.env.IGDB_ID_KEY;
   try {
-    const bodyData = `search "${body.term}"; fields cover.*, *, platforms.*, keywords.*, genres.*;limit 50;`;
+    const resultsOffset = body.page * 50 - 50;
+    const bodyData = `search "${body.term}"; fields cover.*, *, platforms.*, keywords.*, genres.*;limit 50; offset ${resultsOffset};`;
     const url = "https://api.igdb.com/v4/games";
 
+    console.log(
+      "IGDB API call\npage: " +
+        body.page +
+        "\nterm: " +
+        body.term +
+        "\nURL: " +
+        url +
+        "\nbody: " +
+        bodyData
+    );
     // Fetch game data from IGDB API
     const response = await fetch(url, {
       method: "POST",
@@ -436,32 +449,39 @@ async function handleGameSearch(body: { term: any }) {
     });
 
     const data = await response.json();
-
-    // Process and return the search results
-    let resultsPromises = data
-      .filter((game: { cover: undefined }) => game.cover !== undefined)
-      .map(
-        async (game: {
-          title: any;
-          name: any;
-          cover: { url: string };
-          api_id: any;
-          id: any;
-          type: string;
-          description: any;
-          summary: any;
-        }) => {
-          // Process and insert each game into the database
-          game.title = game.name;
-          game.cover = game.cover.url.replace("t_thumb", "t_cover_big");
-          game.api_id = game.id;
-          game.id = await insertGame(game);
-          game.type = "game";
-          game.description = game.summary;
-          return game;
-        }
-      );
-    const results = await Promise.all(resultsPromises);
+    
+    let results;
+    if (
+      data.filter((game: { cover: undefined }) => game.cover !== undefined)
+        .length > 0
+    ) {
+      let resultsPromises = data
+        .filter((game: { cover: undefined }) => game.cover !== undefined)
+        .map(
+          async (game: {
+            title: any;
+            name: any;
+            cover: { url: string };
+            api_id: any;
+            id: any;
+            type: string;
+            description: any;
+            summary: any;
+          }) => {
+            // Process and insert each game into the database
+            game.title = game.name;
+            game.cover = game.cover.url.replace("t_thumb", "t_cover_big");
+            game.api_id = game.id;
+            game.id = await insertGame(game);
+            game.type = "game";
+            game.description = game.summary;
+            return game;
+          }
+        );
+      results = await Promise.all(resultsPromises);
+    } else {
+      results = [{ items: false }];
+    }
     return results;
   } catch (error) {
     console.log(error);
