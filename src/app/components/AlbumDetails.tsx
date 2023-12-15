@@ -5,14 +5,19 @@
 import { useEffect } from "react";
 import useState from "react-usestateref";
 import supabase from "../utils/supabaseClient"; // Importing Supabase client
-import Header from "./Header"; // Header component (not used in this file)
+import { BiCheckCircle, BiErrorCircle, BiPlusCircle } from "react-icons/bi";
+import toast from "react-hot-toast";
+import extractDataFromCookie from "../utils/extractCookie";
 
 // The AlbumDetails component, receiving 'params' as props
-const AlbumDetails = ({ params }: { params: { itemId: string } }) => {
+const AlbumDetails = ({ params }) => {
   // State management for various purposes
   const [results, setResults, resultsRef] = useState([]); // Stores fetched data, its setter, and a ref
   const [isLoading, setIsLoading, isLoadingRef] = useState(true); // Manages loading state
   const [cover, setCover] = useState(""); // Stores album cover URL
+  const [alreadyInLib, setAlreadyInLib, alreadyInLibRef] = useState(false); // State to check if book is already in library
+  const [addedToLib, setAddedToLib, addedToLibRef] = useState(false); // State to check if book was added to library
+  const [userId, setUserId, userIdRef] = useState(""); // State for storing user ID
 
   // A function to handle album type selection logic (currently empty)
   function selectAlbumType() {
@@ -20,6 +25,60 @@ const AlbumDetails = ({ params }: { params: { itemId: string } }) => {
     console.log(resultsRef.current.album);
     console.log(typeof resultsRef.current.album === "object");
   }
+  const addToLibrary = async () => {
+    // Fire toast notification if no user logged in
+    if (userId === "") {
+      toast.error("Log in to add to Library");
+      console.log("no user");
+      return; // This will exit the addToLibrary function
+    }
+
+    // Querying supabase to check if the book is already in the user's library
+    const { data: existingItem, error: existingItemError } = await supabase
+      .from("library")
+      .select("*")
+      .eq("user_id", userIdRef.current);
+    let isInUserLibrary = false;
+    // Check if the book is already in the library
+    if (existingItem) {
+      const filtered = existingItem.filter(
+        (item) => item.item_id === params[1]
+      );
+      if (filtered.length > 0) {
+        isInUserLibrary = true;
+        setAddedToLib(true);
+        setAlreadyInLib(true);
+        console.log("already in library");
+        toast.error("Already in Library!");
+      }
+    } else if (existingItemError) {
+      console.log(existingItemError);
+    }
+    // Add book to the library if it's not already there
+    if (!isInUserLibrary) {
+      setAddedToLib(true);
+      const { error } = await supabase.from("library").insert({
+        item_id: params[1],
+        user_id: userId,
+      });
+      if (error) {
+        console.log(error);
+      } else {
+        toast.success("Added to Library!");
+      }
+    }
+  };
+
+  useEffect(() => {
+    // Extract user data from cookies
+    const data = extractDataFromCookie();
+    if (data) {
+      setUserId(data.userId); // Set user ID from extracted data
+    } else {
+      console.log("auth_data not found in cookie");
+      setUserId(""); // Clear user ID if auth data not found
+    }
+  }, []);
 
   // useEffect hook to handle side effects
   useEffect(() => {
@@ -81,6 +140,21 @@ const AlbumDetails = ({ params }: { params: { itemId: string } }) => {
                 Title: {resultsRef.current.album.name}
               </h1>
               <img src={cover} alt="cover" />
+              <button
+                  onClick={addToLibrary}
+                  className="enabled:hover:ring-4 justify-center items-center flex bg-primary w-8 h-8 rounded-xl disabled:opacity-60"
+                  disabled={addedToLibRef.current === true ? true : false}
+                >
+                  {addedToLibRef.current === true ? (
+                    alreadyInLibRef.current === true ? (
+                      <BiErrorCircle />
+                    ) : (
+                      <BiCheckCircle />
+                    )
+                  ) : (
+                    <BiPlusCircle />
+                  )}
+                </button>
             </div>
             <div className="border-primary w-4/5 border-2 p-4">
               {/* Album wiki and track listing */}

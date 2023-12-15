@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import LeftSidebar from "./components/LeftSidebar";
+import { Toaster } from "react-hot-toast";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,7 +22,21 @@ export default function RootLayout({
         <div className="bg-secondary w-full h-auto">
           <div className="bg-secondary min-h-screen rounded-xl px-4 h-5/6 flex">
             <LeftSidebar />
-            <main className="w-full ml-4">{children}</main>
+            <main className="w-full ml-4">
+              {children}
+              <Toaster
+                position="bottom-left"
+                toastOptions={{
+                  // Define default options
+                  className: "",
+                  duration: 2000,
+                  style: {
+                    background: "#363636",
+                    color: "#fff",
+                  },
+                }}
+              />
+            </main>
           </div>
         </div>
       </body>

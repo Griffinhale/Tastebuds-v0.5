@@ -4,9 +4,10 @@ import useState from "react-usestateref";
 import { BiCheckCircle, BiErrorCircle, BiPlusCircle } from "react-icons/bi";
 import supabase from "../utils/supabaseClient";
 import extractDataFromCookie from "../utils/extractCookie";
+import toast from "react-hot-toast";
 
 // Define a component to display game details
-const GameDetails = ({ params }: { params: [string] }) => {
+const GameDetails = ({ params }: [string]) => {
   // useStateRef is used to create state variables along with references to them
   const [results, setResults, resultsRef] = useState([]);
   const [isLoading, setIsLoading, isLoadingRef] = useState(true);
@@ -17,6 +18,13 @@ const GameDetails = ({ params }: { params: [string] }) => {
 
   // Function to add a game to the user's library
   const addToLibrary = async () => {
+    // Fire toast notification if no user logged in
+    if (userId === "") {
+      toast.error("Log in to add to Library");
+      console.log("no user");
+      return; // This will exit the addToLibrary function
+    }
+
     // Check if the item is already in the user's library
     const { data: existingItem, error: existingItemError } = await supabase
       .from("library")
@@ -38,9 +46,10 @@ const GameDetails = ({ params }: { params: [string] }) => {
         setAddedToLib(true);
         setAlreadyInLib(true);
         console.log("already in library");
+        toast.error("Already in Library!");
       }
-    } else if (error) {
-      console.log(error);
+    } else if (existingItemError) {
+      console.log(existingItemError);
     }
 
     // If the game is not in the library, add it
@@ -57,6 +66,8 @@ const GameDetails = ({ params }: { params: [string] }) => {
 
       if (error) {
         console.log(error);
+      } else {
+        toast.success("Added to Library!");
       }
     }
   };

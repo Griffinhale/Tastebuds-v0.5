@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import supabase from "../utils/supabaseClient";
 import SearchModal from "./SearchModal";
 import extractDataFromCookie from "../utils/extractCookie";
+import toast from "react-hot-toast";
 
 // Define a SearchResult component
 const SearchResult = ({ result, userId }) => {
@@ -30,6 +31,12 @@ const SearchResult = ({ result, userId }) => {
 
   // Function to add an item to the user's library
   const addToLibrary = async () => {
+    // Fire toast notification if no user logged in
+    if (userId === "") {
+      toast.error("Log in to add to Library");
+      console.log("no user");
+      return; // This will exit the addToLibrary function
+    }
     // Check if the item is already in the user's library
     const { data: existingItem, error: existingItemError } = await supabase
       .from("library")
@@ -48,9 +55,10 @@ const SearchResult = ({ result, userId }) => {
         setAddedToLib(true);
         setAlreadyInLib(true);
         console.log("already in library");
+        toast.error("Already in Library!")
       }
-    } else if (error) {
-      console.log(error);
+    } else if (existingItemError) {
+      console.log(existingItemError);
     }
 
     // If the item is not in the library, add it
@@ -65,6 +73,8 @@ const SearchResult = ({ result, userId }) => {
       });
       if (error) {
         console.log(error);
+      } else {
+        toast.success("Added to Library!")
       }
     }
   };
@@ -552,17 +562,13 @@ const SearchResults = () => {
         </div>
         {/*Results*/}
 
-        
-          {userIdRef.current === "" &&
-          categoryRef.current === "Your Library" ? (
-            <div className="grid">
-            <div className="grid grid-rows-1 justify-center mt-8">
-              user not logged in. Please select media format to search through
-              or log in to search library.
-            </div>
-            </div>
-          ) : (
-            <div className="relative grid md:grid-cols-2 lg:grid-cols-3 grid-cols-1 4xl:grid-cols-8 3xl:grid-cols-6 xl:grid-cols-5 py-8 space-x-4 mx-4">
+        {userIdRef.current === "" && categoryRef.current === "Your Library" ? (
+          <div className="flex justify-center mt-8">
+            user not logged in. Please select media format to search through or
+            log in to search library.
+          </div>
+        ) : (
+          <div className="relative grid md:grid-cols-2 lg:grid-cols-3 grid-cols-1 4xl:grid-cols-8 3xl:grid-cols-6 xl:grid-cols-5 py-8 space-x-4 mx-4">
             {resultsRef.current.map((result, index) => {
               return (
                 <SearchResult
@@ -572,13 +578,26 @@ const SearchResults = () => {
                 />
               );
             })}
-          </div>)}
+          </div>
+        )}
 
-          {endOfResultsRef.current === true ?
-          (<div>
-            <div className="flex justify-center mt-8">End of results reached.</div>
-          </div>): null}
-        
+        {endOfResultsRef.current === true ? (
+          resultsRef.current.length === 0 ? (
+            <div>
+              <div className="flex justify-center mt-8">
+                No results found. Try a different search term or choose a
+                different media format.
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div className="w-full border-black h-2 border-t-4"></div>
+              <div className="flex justify-center mt-8">
+                End of results reached.
+              </div>
+            </div>
+          )
+        ) : null}
       </div>
     </div>
   );

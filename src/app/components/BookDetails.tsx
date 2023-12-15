@@ -4,8 +4,8 @@ import useState from "react-usestateref"; // Import custom useState hook that pr
 import { BiCheckCircle, BiErrorCircle, BiPlusCircle } from "react-icons/bi"; // Import icons from react-icons library
 import supabase from "../utils/supabaseClient"; // Import supabase client for database interactions
 import * as DOMPurify from "dompurify"; // Import DOMPurify for sanitizing HTML to prevent XSS attacks
-import Header from "./Header"; // Import Header component (unused in this snippet)
 import extractDataFromCookie from "../utils/extractCookie"; // Import function to extract data from cookies
+import toast from "react-hot-toast";
 
 // BookDetails component declaration using destructuring to extract params from props
 const BookDetails = ({ params }: { params: [string] }) => {
@@ -20,6 +20,13 @@ const BookDetails = ({ params }: { params: [string] }) => {
 
   // Async function to add a book to the library
   const addToLibrary = async () => {
+    // Fire toast notification if no user logged in
+    if (userId === "") {
+      toast.error("Log in to add to Library");
+      console.log("no user");
+      return; // This will exit the addToLibrary function
+    }
+
     // Querying supabase to check if the book is already in the user's library
     const { data: existingItem, error: existingItemError } = await supabase
       .from("library")
@@ -35,9 +42,11 @@ const BookDetails = ({ params }: { params: [string] }) => {
         isInUserLibrary = true;
         setAddedToLib(true);
         setAlreadyInLib(true);
+        console.log("already in library");
+        toast.error("Already in Library!");
       }
-    } else if (error) {
-      console.log(error);
+    } else if (existingItemError) {
+      console.log(existingItemError);
     }
     // Add book to the library if it's not already there
     if (!isInUserLibrary) {
@@ -48,6 +57,8 @@ const BookDetails = ({ params }: { params: [string] }) => {
       });
       if (error) {
         console.log(error);
+      } else {
+        toast.success("Added to Library!");
       }
     }
   };
