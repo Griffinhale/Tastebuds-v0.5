@@ -23,7 +23,7 @@ const HomePage = () => {
               <p>
                <Link className="font-bold" href="/">Riley</Link> added to her <Link className="font-bold" href="/">Dog Movie</Link> snack. 
               </p>
-              <p>{new Date().toISOString()}</p>
+              <p>Date goes here</p>
             </div>
           </div>
           <div className="my-4 inline-flex w-full border-1 border-white">
@@ -32,7 +32,7 @@ const HomePage = () => {
               <p>
                 <Link className="font-bold" href="/">Sarah</Link> said she&apos;s listening to <Link className="font-bold" href="/">Styx</Link>.
               </p>
-              <p>{new Date().toISOString()}</p>
+              <p>Date goes here</p>
             </div>
           </div>
           <div className="my-4 inline-flex w-full border-1 border-white">
@@ -41,7 +41,7 @@ const HomePage = () => {
               <p>
                 <Link className="font-bold" href="/">Riley</Link> added to her <Link className="font-bold" href="/">Dog Movies</Link> snack. 
               </p>
-              <p>{new Date().toISOString()}</p>
+              <p>Date goes here</p>
             </div>
           </div>
           <div className="my-4 inline-flex w-full border-1 border-white">
@@ -50,7 +50,7 @@ const HomePage = () => {
               <p>
                 <Link className="font-bold" href="/">Sarah</Link> said she&apos;s listening to <Link className="font-bold" href="/">Styx</Link>.
               </p>
-              <p>{new Date().toISOString()}</p>
+              <p>Date goes here</p>
             </div>
           </div>
           <div className="my-4 inline-flex w-full border-1 border-white">
@@ -59,7 +59,7 @@ const HomePage = () => {
               <p>
                <Link className="font-bold" href="/">Riley</Link> added to her <Link className="font-bold" href="/">Dog Movie</Link> snack. 
               </p>
-              <p>{new Date().toISOString()}</p>
+              <p>Date goes here</p>
             </div>
           </div>
           <div className="my-4 inline-flex w-full border-1 border-white">
@@ -68,7 +68,7 @@ const HomePage = () => {
               <p>
                 <Link className="font-bold" href="/">Sarah</Link> said she&apos;s listening to <Link className="font-bold" href="/">Styx</Link>.
               </p>
-              <p>{new Date().toISOString()}</p>
+              <p>Date goes here</p>
             </div>
           </div>
           <div className="my-4 inline-flex w-full border-1 border-white">
@@ -77,7 +77,7 @@ const HomePage = () => {
               <p>
                 <Link className="font-bold" href="/">Riley</Link> added to her <Link className="font-bold" href="/">Dog Movie</Link> snack. 
               </p>
-              <p>{new Date().toISOString()}</p>
+              <p>Date goes here</p>
             </div>
           </div>
         </div>

@@ -1,9 +1,15 @@
 import { useEffect } from "react";
 import Header from "./Header";
 import supabase from "../utils/supabaseClient";
+import { useRouter } from "next/navigation";
+import extractDataFromCookie from "../utils/extractCookie";
+import useState from "react-usestateref";
 
 // Define a component for the login page
 const LogInPage = () => {
+  const router = useRouter();
+  const [userId, setUserId, userIdRef] = useState("");
+
   // Function to handle user sign up
   const handleSignup = async (e) => {
     e.preventDefault(); // Prevent the default form submission behavior
@@ -29,6 +35,8 @@ const LogInPage = () => {
     });
     const data = await res.json(); // Parse the response
     console.log(data); // Log the response data for debugging
+    location.reload();
+    router.push("/");
   };
 
   // Function to handle user login
@@ -40,7 +48,7 @@ const LogInPage = () => {
     const body = JSON.stringify({
       email: formData.get("email"),
       password: formData.get("password"),
-      type: "login"
+      type: "login",
     });
 
     // Send a POST request to the server to handle the login
@@ -50,21 +58,30 @@ const LogInPage = () => {
         "Content-Type": "application/json",
       },
       body: body,
-    })
+    });
     const data = await res.json(); // Parse the response
     console.log(data.data.session); // Log the session data for debugging
+    location.reload();
   };
 
   // useEffect hook to check the login status when the component mounts
   useEffect(() => {
     async function checkLogin() {
       // Use Supabase client to check the current session
-      const { data, error } = await supabase.auth.getSession()
-      console.log(error); // Log any errors for debugging
+      const data = extractDataFromCookie();
+      if (data) {
+        setUserId(data.userId); // Set user ID from extracted data
+      } else {
+        console.log("auth_data not found in cookie");
+        setUserId(""); // Clear user ID if auth data not found
+      }
+      if (userIdRef.current !== "") {
+        router.push("/");
+      }
     }
-    
+
     checkLogin(); // Call the checkLogin function
-  }) // Missing dependency array, which might cause this effect to run on every re-render
+  }, []); // Missing dependency array, which might cause this effect to run on every re-render
 
   return (
     <div className="flex flex-col h-4/5 min-h-[1200px] w-full rounded-xl text-primary">
@@ -128,7 +145,11 @@ const LogInPage = () => {
               Submit
             </button>
           </form>
-          <form onSubmit={handleLogin} method="post" className="flex flex-col border-black border-s-2 p-4 rounded-xl mt-8">
+          <form
+            onSubmit={handleLogin}
+            method="post"
+            className="flex flex-col border-black border-s-2 p-4 rounded-xl mt-8"
+          >
             <label for="email">Email</label>
             <br />
             <input name="email" type="email"></input>

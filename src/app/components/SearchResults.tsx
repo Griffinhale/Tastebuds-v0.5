@@ -591,7 +591,7 @@ const SearchResults = () => {
             </div>
           ) : (
             <div>
-              <div className="w-full border-black h-2 border-t-4"></div>
+              <div className="w-full border-black h-2 border-t-4 mt-4"></div>
               <div className="flex justify-center mt-8">
                 End of results reached.
               </div>

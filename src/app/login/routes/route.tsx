@@ -28,11 +28,12 @@ export async function POST(req: NextRequest)  {
 
         // Create a JSON response with the user data
         let response = NextResponse.json({status: 200, data: data});
-        
+        console.log(response); // Log the response
         // Extract and store user data in a cookie
         let userData = {
             token: data.session.access_token,
-            userId: data.session.user.id
+            userId: data.session.user.id,
+            screenName: data.session.user.user_metadata.screen_name
         };
         console.log(userData); // Log user data for debugging
         response.cookies.set('auth_data', JSON.stringify(userData)); // Set cookie

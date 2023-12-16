@@ -1,11 +1,11 @@
 function extractDataFromCookie() {
     // Get the entire cookie string
     const cookieString = document.cookie;
-
+    console.log(cookieString);
     // Extract the auth_data value from the cookie string
     const authDataMatch = cookieString.match(/auth_data=([^;]+)/);
     if (!authDataMatch) return null;
-
+    console.log(authDataMatch);
     // Decode the URI component to get the JSON string
     const authDataJSON = decodeURIComponent(authDataMatch[1]);
 

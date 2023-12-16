@@ -1,54 +1,47 @@
 import { useEffect } from 'react'
+
 import useState from "react-usestateref"
 import Link from "next/link"
+import extractDataFromCookie from '../utils/extractCookie'
+import supabase from "../utils/supabaseClient";
 
 // Define a Header component
 const Header = () => {
   // Using useStateRef to create a state variable for user along with a reference to it
-  const [user, setUser, userRef] = useState("")
+  const [userId, setUserId, userIdRef] = useState("");
+  const [screenName, setScreenName, screenNameRef] = useState("");
 
+  //Supabase log out and refresh token
+  const logOut = async () => {
+    console.log(document.cookie)
+    const {error} = await supabase.auth.signOut();
+    localStorage.clear();
+    sessionStorage.clear();
+    document.cookie.split(";").forEach(function(c) {
+      document.cookie = c.trim().split("=")[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
+    });
+    console.log(document.cookie);
+    location.reload();
+  }
   // useEffect hook to run side effects, in this case, to extract user data from cookies
   useEffect(() => {
-    // Function to extract user data from cookie
-    function extractDataFromCookie() {
-      // Get the entire cookie string
-      const cookieString = document.cookie;
-  
-      // Extract the auth_data value from the cookie string
-      const authDataMatch = cookieString.match(/auth_data=([^;]+)/);
-      if (!authDataMatch) return null;
-  
-      // Decode the URI component to get the JSON string
-      const authDataJSON = decodeURIComponent(authDataMatch[1]);
-  
-      // Parse the JSON string to get the object
-      const authDataObj = JSON.parse(authDataJSON);
-  
-      // Extract the userId and screenName properties
-      const userId = authDataObj.userId;
-      const screenName = authDataObj.screenName;
-  
-      return { userId, screenName };
-    }
-  
-    // Extract user data and update the user state
+    // Extract user data from cookies
     const data = extractDataFromCookie();
     if (data) {
-        console.log("UserId:", data.userId);
-        console.log("ScreenName:", data.screenName);
-        setUser(data.screenName); // Set the user's screen name
+      setUserId(data.userId); // Set user ID from extracted data
+      setScreenName(data.screenName); // Set screen name from extracted data
     } else {
-        console.log("auth_data not found in cookie");
-        setUser("") // Clear the user state if auth data is not found
+      console.log("auth_data not found in cookie");
+      setUserId(""); // Clear user ID if auth data not found
     }
-  }, [setUser]) // Empty dependency array means this effect runs only once when the component mounts
+  }, []);
 
   // Render the header component
   return (
     <div className="h-24 w-full inline-flex my-6">
-        <div className="mt-20 text-xl ml-20 w-[75%]">
+        <div className="mt-20 text-xl inline-flex ml-20 w-[75%]">
           {/* Display the user's screen name if logged in, otherwise show a link to sign up/login */}
-          {userRef.current !== ""? <Link href="/library">{userRef.current}</Link>:<Link href="/login">Sign Up/Login</Link>}
+          {userIdRef.current !== ""?(<><p className="pr-4">{screenNameRef.current}</p> <Link onClick={logOut} href="/">Sign Out</Link></>):<Link href="/login">Sign Up/Login</Link>}
         </div>
         <div className="w-1/5 text-4xl font-bold pl-6 pt-10 pr-6">
           <h1>TasteBuds</h1> {/* Static title for the header */}
