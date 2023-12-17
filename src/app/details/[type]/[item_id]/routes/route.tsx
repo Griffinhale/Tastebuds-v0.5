@@ -30,7 +30,6 @@ async function getTwitchKeys() {
 export async function POST(req: NextRequest) {
   const body = await req.json();
   let results;
-  console.log(body);
   // Switch case to handle different types of media
   switch(body.type) {
     case "album": results = await handleAlbumDetails(body); break;
@@ -56,8 +55,8 @@ async function handleAlbumDetails(body){
   const response = await fetch(searchURL)
   const data = await response.json()
   
-  console.log(data);
-  return data;
+  console.log(typeof data);
+  return [data];
 }
 
 // Function to handle book details

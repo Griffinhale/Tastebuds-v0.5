@@ -20,7 +20,7 @@ const LeftSidebar = () => {
   const [showIcon, setShowIcon] = useState(true); // State for controlling visibility of search icon
   const [searchTerm, setSearchTerm] = useState(""); // State for holding search term
   const [userId, setUserId, userIdRef] = useState("");
-  const inputRef = useRef(); // useRef hook to create a reference for the input field
+  const inputRef = useRef<HTMLInputElement>(null); // useRef hook to create a reference for the input field
 
   // useRouter hook from Next.js to handle routing
   const router = useRouter();
@@ -30,11 +30,11 @@ const LeftSidebar = () => {
     setSearchTerm(""); 
     setIsClicked(false); 
     setShowIcon(true); 
-    inputRef.current.blur(); // Remove focus from the input field
+    inputRef.current!.blur(); // Remove focus from the input field
   };
 
   // Function to handle the submission of the search form
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: { preventDefault: () => void; }) => {
     event.preventDefault(); 
     router.push(`/search?term=${encodeURIComponent(searchTerm)}`); 
 
@@ -57,7 +57,7 @@ const LeftSidebar = () => {
       console.log("auth_data not found in cookie");
       setUserId(""); // Clear user ID if auth data not found
     }
-  }, []);
+  });
   return (
     <div className="flex text-black">
       <div className="sticky w-[300px] h-screen top-[0px] py-12">
@@ -71,7 +71,7 @@ const LeftSidebar = () => {
                 if (!isClicked) {
                   setIsClicked(true);
                   setShowIcon(false);
-                  inputRef.current.focus();
+                  inputRef.current!.focus();
                 }
               }}
               className={`flex items-center justify-center w-[80%] my-6 mt-0 h-12 relative transition-all duration-500 ease-in-out ${

@@ -15,7 +15,7 @@ const Home = () => {
   const router = useRouter();
   const pathname = usePathname();
   const params = pathname.split("/").slice(2);
-  console.log(params);
+  
   let PageComponent;
 
   switch (params[0]) {

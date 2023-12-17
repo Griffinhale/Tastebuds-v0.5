@@ -2,15 +2,22 @@ import { useEffect, useRef } from "react";
 import useState from "react-usestateref";
 import Link from "next/link";
 
+interface SearchModalProps {
+result: any;
+show: boolean;
+onBlur: () => void;
+onClose: () => void;
+}
+
 // Define a SearchModal component
-const SearchModal = ({ show, onClose, result }) => {
+const SearchModal: React.FC<SearchModalProps> = ({ show, onClose, result }) => {
   const [detailsLink, setDetailsLink, detailsLinkRef] = useState("");
   const modalRef = useRef();
 
   // useEffect hook for handling clicks outside of the modal
   useEffect(() => {
     // Function to handle clicks outside of the modal
-    const handleClickOutside = (event) => {
+    const handleClickOutside = (event: { target: any; }) => {
       // If the clicked area is outside the modal, close the modal
       if (modalRef.current && !modalRef.current.contains(event.target)) {
         onClose();
@@ -25,6 +32,7 @@ const SearchModal = ({ show, onClose, result }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onClose]); // Dependency array to re-run the effect if onClose changes
 
   // Conditionally render the modal if 'show' is true

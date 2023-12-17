@@ -34,6 +34,7 @@ const Header = () => {
       console.log("auth_data not found in cookie");
       setUserId(""); // Clear user ID if auth data not found
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Render the header component

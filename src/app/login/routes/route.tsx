@@ -31,9 +31,9 @@ export async function POST(req: NextRequest)  {
         console.log(response); // Log the response
         // Extract and store user data in a cookie
         let userData = {
-            token: data.session.access_token,
-            userId: data.session.user.id,
-            screenName: data.session.user.user_metadata.screen_name
+            token: data.session!.access_token,
+            userId: data.session!.user.id,
+            screenName: data.session!.user.user_metadata.screen_name
         };
         console.log(userData); // Log user data for debugging
         response.cookies.set('auth_data', JSON.stringify(userData)); // Set cookie
@@ -59,9 +59,9 @@ export async function POST(req: NextRequest)  {
         
         // Extract and store user data in a cookie
         let userData = {
-            token: data.session.access_token,
-            userId: data.session.user.id,
-            screenName: data.session.user.user_metadata.screen_name
+            token: data.session!.access_token,
+            userId: data.session!.user.id,
+            screenName: data.session!.user.user_metadata.screen_name
         };
         console.log(userData); // Log user data for debugging
         

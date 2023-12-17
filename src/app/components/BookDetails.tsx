@@ -1,5 +1,5 @@
 "use client"; // Directive to ensure this code runs on the client side in a Next.js application
-import { useEffect } from "react"; // Import useEffect hook from React for handling side effects
+import { JSXElementConstructor, Key, PromiseLikeOfReactNode, ReactElement, ReactNode, ReactPortal, useEffect } from "react"; // Import useEffect hook from React for handling side effects
 import useState from "react-usestateref"; // Import custom useState hook that provides a ref to the state
 import { BiCheckCircle, BiErrorCircle, BiPlusCircle } from "react-icons/bi"; // Import icons from react-icons library
 import supabase from "../utils/supabaseClient"; // Import supabase client for database interactions
@@ -7,8 +7,12 @@ import * as DOMPurify from "dompurify"; // Import DOMPurify for sanitizing HTML 
 import extractDataFromCookie from "../utils/extractCookie"; // Import function to extract data from cookies
 import toast from "react-hot-toast";
 
+interface Params {
+  params: [string, string];
+}
+
 // BookDetails component declaration using destructuring to extract params from props
-const BookDetails = ({ params }: { params: [string] }) => {
+const BookDetails: React.FC<Params> = ({ params }) => {
   // State declarations for various aspects of the component
   const [results, setResults, resultsRef] = useState([]); // State to hold book details
   const [isLoading, setIsLoading, isLoadingRef] = useState(true); // State to track loading status
@@ -142,7 +146,7 @@ const BookDetails = ({ params }: { params: [string] }) => {
         .eq("id", item_id);
 
       // Additional request to fetch more details using an external API
-      const bodyData = { type: params[0], api_id: bookDetails[0].api_id };
+      const bodyData = { type: params[0], api_id: bookDetails![0].api_id };
       const response = await fetch(
         "/details/" + params[0] + "/" + params[1] + "/routes",
         {
@@ -162,6 +166,7 @@ const BookDetails = ({ params }: { params: [string] }) => {
     }
     // Execute the function to fetch book details
     getBookDetails(params[1]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // JSX to render the component
@@ -219,7 +224,7 @@ const BookDetails = ({ params }: { params: [string] }) => {
                 <ul>
                   <p className="font-bold">Categories:</p>
                   {resultsRef.current.volumeInfo.categories?.map(
-                    (category, index) => {
+                    (category: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | PromiseLikeOfReactNode | null | undefined, index: Key | null | undefined) => {
                       return <li key={index}>{category}</li>;
                     }
                   )}

@@ -1,13 +1,17 @@
 "use client";
-import { useEffect } from "react";
+import { JSXElementConstructor, Key, PromiseLikeOfReactNode, ReactElement, ReactNode, ReactPortal, useEffect } from "react";
 import useState from "react-usestateref";
 import { BiCheckCircle, BiErrorCircle, BiPlusCircle } from "react-icons/bi";
 import supabase from "../utils/supabaseClient";
 import extractDataFromCookie from "../utils/extractCookie";
 import toast from "react-hot-toast"
 
+interface Params {
+  params: [string, string];
+}
+
 // Component for displaying details of a video
-const VideoDetails = ({ params }: { params: [string] }) => {
+const VideoDetails: React.FC<Params> = ({ params }) => {
   // State management for video details, loading status, library status, etc.
   const [results, setResults, resultsRef] = useState([]);
   const [isLoading, setIsLoading, isLoadingRef] = useState(true);
@@ -87,14 +91,14 @@ const VideoDetails = ({ params }: { params: [string] }) => {
         .select("*")
         .eq("id", item_id);
 
-      console.log(videoDetails[0]);
-      setCover(videoDetails[0].cover); // Set cover image
+      console.log(videoDetails![0]);
+      setCover(videoDetails![0].cover); // Set cover image
 
       // Prepare data for additional details fetch
       const bodyData = {
         type: params[0],
-        api_id: videoDetails[0].api_id,
-        video_type: videoDetails[0].video_type,
+        api_id: videoDetails![0].api_id,
+        video_type: videoDetails![0].video_type,
       };
       // Fetch additional details
       const response = await fetch(
@@ -108,13 +112,14 @@ const VideoDetails = ({ params }: { params: [string] }) => {
         }
       );
       let data = await response.json();
-      data.video_type = videoDetails[0].video_type;
+      data.video_type = videoDetails![0].video_type;
       setResults(data); // Set the results state
       setIsLoading(false); // Set loading to false
       console.log(resultsRef.current); // Log the results for debugging
     }
     console.log(params); // Log params for debugging
     getVideoDetails(params[1]); // Call the function to get video details
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array ensures this effect runs only once on mount
 
   if (resultsRef.current.video_type === "tv") {
@@ -167,7 +172,7 @@ const VideoDetails = ({ params }: { params: [string] }) => {
                 <div>
                   <h2>Genres:</h2>
                   {resultsRef.current.genres ? (
-                    resultsRef.current.genres.map((genre, index) => {
+                    resultsRef.current.genres.map((genre: { name: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | PromiseLikeOfReactNode | null | undefined; }, index: Key | null | undefined) => {
                       return <p key={index}>{genre.name}</p>;
                     })
                   ) : (

@@ -103,7 +103,7 @@ const LogInPage = () => {
             className="flex flex-col justify-center w-full mt-6 border-s-[2px] border-black rounded-xl p-4"
             method="post"
           >
-            <label className=" p-2 rounded-xl underline " for="screen_name">
+            <label className=" p-2 rounded-xl underline " htmlFor="screen_name">
               Screen Name
             </label>
             <br />
@@ -114,11 +114,12 @@ const LogInPage = () => {
               required
             />
             <br />
-            <label className=" p-2 rounded-xl underline " for="email">
+            <label className=" p-2 rounded-xl underline " htmlFor="email">
               Email
             </label>
             <br />
             <input
+              autoComplete="off"
               className=" rounded-xl"
               type="email"
               name="email"
@@ -126,12 +127,13 @@ const LogInPage = () => {
               pattern=".+@.+"
             />
             <br />
-            <label className=" p-2 rounded-xl underline" for="password">
+            <label className=" p-2 rounded-xl underline" htmlFor="password">
               Password
             </label>
             <br />
             <input
               className=" rounded-xl"
+              autoComplete="new-password"
               type="password"
               name="password"
               required
@@ -150,13 +152,13 @@ const LogInPage = () => {
             method="post"
             className="flex flex-col border-black border-s-2 p-4 rounded-xl mt-8"
           >
-            <label for="email">Email</label>
+            <label htmlFor="email">Email</label>
             <br />
-            <input name="email" type="email"></input>
+            <input autoComplete="off" name="email" type="email"></input>
             <br />
-            <label for="password">Password</label>
+            <label htmlFor="password" >Password</label>
             <br />
-            <input name="password" type="password"></input>
+            <input autoComplete="current-password" name="password" type="password"></input>
             <br />
             <button
               className="bg-primary mt-4 px-4 py-2 border-black rounded-xl border-2"

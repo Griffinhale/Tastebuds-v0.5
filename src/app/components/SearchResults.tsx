@@ -2,7 +2,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import useState from "react-usestateref";
-import axios from "axios";
 import { BiCheckCircle, BiPlusCircle, BiErrorCircle } from "react-icons/bi";
 import Header from "./Header";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -80,7 +79,7 @@ const SearchResult = ({ result, userId }) => {
   };
 
   // Function to get button style based on the item type
-  const getButtonStyle = (type) => {
+  const getButtonStyle = (type: string) => {
     // Returns specific styles for different item types
     if (type === "book") {
       return "items-center justify-center w-full h-80 flex flex-col hover:ring-4 rounded-full relative bg-red-500/30";
@@ -94,7 +93,7 @@ const SearchResult = ({ result, userId }) => {
   };
 
   // Function to get image style based on the item type
-  const getImgStyle = (type) => {
+  const getImgStyle = (type: string) => {
     // Returns specific styles for different item types
     if (type === "book") {
       return "w-45 h-60 rounded-xl overflow-hidden";
@@ -131,14 +130,13 @@ const SearchResult = ({ result, userId }) => {
           <BiPlusCircle />
         )}
       </button>
-
-      <SearchModal
-        className="w-[20%]"
+      <div className="w-[20%]"><SearchModal
         result={result}
         show={isModalOpen}
         onBlur={handleCloseModal}
         onClose={handleCloseModal}
-      />
+      /></div>
+      
     </div>
   );
 };
@@ -184,6 +182,7 @@ const SearchResults = () => {
 
   // Callback function for handling book category selection
   const handleBooksClick = useCallback(async () => {
+    setPage(1); // Reset the page number
     setIsLoading(true); // Set loading to true
     setResults([]); // Clear current results
     setEndofResults(false); // Reset end of results state
@@ -486,7 +485,7 @@ const SearchResults = () => {
     window.addEventListener("scroll", debouncedHandleScroll); // Add scroll event listener
     return () => window.removeEventListener("scroll", debouncedHandleScroll); // Cleanup on unmount
   }, [debouncedHandleScroll]);
-
+  const termCheck = useSearchParams().get("term")
   // useEffect hook for handling search term changes
   useEffect(() => {
     wipeResults(); // Clear current results
@@ -495,7 +494,7 @@ const SearchResults = () => {
       console.log("changed term");
       setTerm(newTerm); // Update term state if it has changed
     }
-  }, [useSearchParams().get("term")]);
+  }, [termCheck]);
 
   // useEffect hook to initialize component based on search term
   useEffect(() => {

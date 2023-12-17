@@ -2,17 +2,25 @@
 "use client";
 
 // Import necessary hooks and utilities
-import { useEffect } from "react";
+import { JSXElementConstructor, Key, PromiseLikeOfReactNode, ReactElement, ReactNode, ReactPortal, useEffect } from "react";
 import useState from "react-usestateref";
 import supabase from "../utils/supabaseClient"; // Importing Supabase client
 import { BiCheckCircle, BiErrorCircle, BiPlusCircle } from "react-icons/bi";
 import toast from "react-hot-toast";
 import extractDataFromCookie from "../utils/extractCookie";
 
+interface Params {
+  params: [string, string];
+}
+
 // The AlbumDetails component, receiving 'params' as props
-const AlbumDetails = ({ params }) => {
+const AlbumDetails: React.FC<Params> = ({ params }) => {
+  interface ResultItem {
+  album: object;
+  wiki: string
+}
   // State management for various purposes
-  const [results, setResults, resultsRef] = useState([]); // Stores fetched data, its setter, and a ref
+  const [results, setResults, resultsRef] = useState<object[]>([]); // Stores fetched data, its setter, and a ref
   const [isLoading, setIsLoading, isLoadingRef] = useState(true); // Manages loading state
   const [cover, setCover] = useState(""); // Stores album cover URL
   const [alreadyInLib, setAlreadyInLib, alreadyInLibRef] = useState(false); // State to check if book is already in library
@@ -20,11 +28,11 @@ const AlbumDetails = ({ params }) => {
   const [userId, setUserId, userIdRef] = useState(""); // State for storing user ID
 
   // A function to handle album type selection logic (currently empty)
-  function selectAlbumType() {
+  /*function selectAlbumType() {
     console.log();
-    console.log(resultsRef.current.album);
-    console.log(typeof resultsRef.current.album === "object");
-  }
+    console.log(resultsRef.current[0].album);
+    console.log(typeof resultsRef.current[0].album === "object");
+  }*/
   const addToLibrary = async () => {
     // Fire toast notification if no user logged in
     if (userId === "") {
@@ -78,6 +86,7 @@ const AlbumDetails = ({ params }) => {
       console.log("auth_data not found in cookie");
       setUserId(""); // Clear user ID if auth data not found
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // useEffect hook to handle side effects
@@ -91,10 +100,10 @@ const AlbumDetails = ({ params }) => {
         .eq("id", item_id);
 
       // Logging and setting state with fetched data
-      console.log(albumDetails[0].creator, albumDetails[0].title);
-      const artist = albumDetails[0].creator;
-      const album = albumDetails[0].title;
-      setCover(albumDetails[0].cover);
+      
+      const artist = albumDetails![0].creator;
+      const album = albumDetails![0].title;
+      setCover(albumDetails![0].cover);
       const bodyData = { type: params[0], artist: artist, album: album };
 
       // Making a POST request to a server route
@@ -109,17 +118,17 @@ const AlbumDetails = ({ params }) => {
         }
       );
       const data = await response.json();
-      console.log(data);
       setResults(data);
       setIsLoading(false);
-      console.log(resultsRef.current.album.artist);
+      console.log(resultsRef.current[0].album.artist);
       return data;
     }
 
     // Executing functions when the component mounts
-    console.log(params);
+    
     getAlbumDetails(params[1]);
-    selectAlbumType();
+    
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array means this runs once on mount
 
   // JSX for rendering the component
@@ -136,8 +145,8 @@ const AlbumDetails = ({ params }) => {
             {/* Album info section */}
             <div className="border-primary flex flex-col items-center lg:justify-start justify-between border-2 p-4">
               <h1 className="text-3xl mb-16 font-bold">
-                Artist: {resultsRef.current.album.artist},<br />
-                Title: {resultsRef.current.album.name}
+                Artist: {resultsRef.current[0].album.artist},<br />
+                Title: {resultsRef.current[0].album.name}
               </h1>
               <img src={cover} alt="cover" />
               <button
@@ -165,9 +174,9 @@ const AlbumDetails = ({ params }) => {
                 <ol>
                   <h2 className="text-xl font-semibold mb-8">Track listing</h2>
                   {/* Dynamic rendering of track list based on the album type */}
-                  {resultsRef.current.album.tracks?.track.length ? (
-                    resultsRef.current.album.tracks.track.map(
-                      (result, index) => {
+                  {resultsRef.current[0].album.tracks?.track.length ? (
+                    resultsRef.current[0].album.tracks.track.map(
+                      (result: { url: string | undefined; name: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | PromiseLikeOfReactNode | null | undefined; duration: number; }, index: number) => {
                         // Mapping through each track and displaying its details
                         return (
                           <li
@@ -195,32 +204,32 @@ const AlbumDetails = ({ params }) => {
                         1.{" "}
                         <a
                           href={
-                            resultsRef.current.album.tracks
-                              ? resultsRef.current.album.tracks.track.url
-                              : resultsRef.current.album.url
+                            resultsRef.current[0].album.tracks
+                              ? resultsRef.current[0].album.tracks.track.url
+                              : resultsRef.current[0].album.url
                           }
                         >
-                          {resultsRef.current.album.tracks
-                            ? resultsRef.current.album.tracks.track.name
-                            : resultsRef.current.album.name}
+                          {resultsRef.current[0].album.tracks
+                            ? resultsRef.current[0].album.tracks.track.name
+                            : resultsRef.current[0].album.name}
                         </a>
                       </div>
-                      {resultsRef.current.album &&
-                      resultsRef.current.album.tracks ? (
+                      {resultsRef.current[0].album &&
+                      resultsRef.current[0].album.tracks ? (
                         // Displaying runtime if available
                         <div className="w/1/5">
                           RUNTIME:{" "}
                           {Math.floor(
-                            resultsRef.current.album.tracks.track.duration / 60
+                            resultsRef.current[0].album.tracks.track.duration / 60
                           )}
                           :
-                          {resultsRef.current.album.tracks.track.duration % 60 <
+                          {resultsRef.current[0].album.tracks.track.duration % 60 <
                           10
                             ? `0${
-                                resultsRef.current.album.tracks.track.duration %
+                                resultsRef.current[0].album.tracks.track.duration %
                                 60
                               }`
-                            : resultsRef.current.album.tracks.track.duration %
+                            : resultsRef.current[0].album.tracks.track.duration %
                               60}
                         </div>
                       ) : null}

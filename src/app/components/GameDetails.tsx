@@ -1,13 +1,17 @@
 "use client";
-import { useEffect } from "react";
+import { JSXElementConstructor, Key, PromiseLikeOfReactNode, ReactElement, ReactNode, ReactPortal, useEffect } from "react";
 import useState from "react-usestateref";
 import { BiCheckCircle, BiErrorCircle, BiPlusCircle } from "react-icons/bi";
 import supabase from "../utils/supabaseClient";
 import extractDataFromCookie from "../utils/extractCookie";
 import toast from "react-hot-toast";
 
+interface Params {
+  params: [string, string];
+}
+
 // Define a component to display game details
-const GameDetails = ({ params }: [string]) => {
+const GameDetails: React.FC<Params> = ({ params }) => {
   // useStateRef is used to create state variables along with references to them
   const [results, setResults, resultsRef] = useState([]);
   const [isLoading, setIsLoading, isLoadingRef] = useState(true);
@@ -93,11 +97,11 @@ const GameDetails = ({ params }: [string]) => {
         .select("*")
         .eq("id", item_id);
 
-      console.log(gameDetails[0]);
-      setCover(gameDetails[0].cover);
+      console.log(gameDetails![0]);
+      setCover(gameDetails![0].cover);
 
       // Prepare data for fetching additional details
-      const bodyData = { type: params[0], api_id: gameDetails[0].api_id };
+      const bodyData = { type: params[0], api_id: gameDetails![0].api_id };
 
       // Make an API call to fetch additional details
       const response = await fetch(
@@ -123,6 +127,7 @@ const GameDetails = ({ params }: [string]) => {
     console.log(params);
     // Call the function to get game details
     getGameDetails(params[1]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array ensures this runs only once when the component mounts
 
   return (
@@ -168,7 +173,7 @@ const GameDetails = ({ params }: [string]) => {
               <div>
                 <h2>Genres:</h2>
                 {resultsRef.current.genres
-                  ? resultsRef.current.genres.map((genre, index) => {
+                  ? resultsRef.current.genres.map((genre: { name: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | PromiseLikeOfReactNode | null | undefined; }, index: Key | null | undefined) => {
                       return <p key={index}>{genre.name}</p>;
                     })
                   : null}
