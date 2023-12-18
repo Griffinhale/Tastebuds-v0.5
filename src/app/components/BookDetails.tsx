@@ -123,6 +123,7 @@ const BookDetails: React.FC<Params> = ({ params }) => {
         return "No dimensions available";
     }
   }
+<<<<<<< HEAD
 
   // useEffect hook to perform actions on component mount
   useEffect(() => {
@@ -131,12 +132,25 @@ const BookDetails: React.FC<Params> = ({ params }) => {
     if (data) {
       console.log("UserId:", data.userId);
       console.log("ScreenName:", data.screenName);
+=======
+  // Extract user ID from cookie
+  useEffect(() => {
+    const data = extractDataFromCookie();
+    if (data) {
+>>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
       setUserId(data.userId);
     } else {
       console.log("auth_data not found in cookie");
       setUserId("");
     }
+<<<<<<< HEAD
 
+=======
+  }, [])
+
+  // Grab further details on component mount
+  useEffect(() => {
+>>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
     // Async function to fetch book details
     async function getBookDetails(item_id: string) {
       // Fetching book details from the database
@@ -167,7 +181,11 @@ const BookDetails: React.FC<Params> = ({ params }) => {
     // Execute the function to fetch book details
     getBookDetails(params[1]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
+<<<<<<< HEAD
   }, []);
+=======
+  }, [params]);
+>>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
 
   // JSX to render the component
   return (
@@ -187,7 +205,11 @@ const BookDetails: React.FC<Params> = ({ params }) => {
               </h1>
               <h2 className="text-xl">
                 {resultsRef.current.volumeInfo.subtitle}, by{" "}
+<<<<<<< HEAD
                 {resultsRef.current.volumeInfo.authors[0]}
+=======
+                {resultsRef.current.volumeInfo.authors?.[0]}
+>>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
               </h2>
               <a href={resultsRef.current.volumeInfo.previewLink}>
                 <img

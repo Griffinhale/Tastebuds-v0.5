@@ -25,7 +25,10 @@ const GameDetails: React.FC<Params> = ({ params }) => {
     // Fire toast notification if no user logged in
     if (userId === "") {
       toast.error("Log in to add to Library");
+<<<<<<< HEAD
       console.log("no user");
+=======
+>>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
       return; // This will exit the addToLibrary function
     }
 
@@ -39,7 +42,10 @@ const GameDetails: React.FC<Params> = ({ params }) => {
 
     // If the item exists, check if it matches the current game
     if (existingItem) {
+<<<<<<< HEAD
       console.log("check library");
+=======
+>>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
       const filtered = existingItem.filter(
         (item) => item.item_id === params[1]
       );
@@ -49,7 +55,10 @@ const GameDetails: React.FC<Params> = ({ params }) => {
         isInUserLibrary = true;
         setAddedToLib(true);
         setAlreadyInLib(true);
+<<<<<<< HEAD
         console.log("already in library");
+=======
+>>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
         toast.error("Already in Library!");
       }
     } else if (existingItemError) {
@@ -58,8 +67,11 @@ const GameDetails: React.FC<Params> = ({ params }) => {
 
     // If the game is not in the library, add it
     if (isInUserLibrary === false) {
+<<<<<<< HEAD
       console.log("adding to library");
       console.log(params[1]);
+=======
+>>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
       setAddedToLib(true);
 
       // Insert the game into the library in the database
@@ -76,6 +88,7 @@ const GameDetails: React.FC<Params> = ({ params }) => {
     }
   };
 
+<<<<<<< HEAD
   // useEffect hook to load game details on component mount
   useEffect(() => {
     // Extract user data from cookie
@@ -83,13 +96,26 @@ const GameDetails: React.FC<Params> = ({ params }) => {
     if (data) {
       console.log("UserId:", data.userId);
       console.log("ScreenName:", data.screenName);
+=======
+  // Extract user data from cookie
+  useEffect(() => {
+    const data = extractDataFromCookie();
+    if (data) {
+>>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
       setUserId(data.userId);
     } else {
       console.log("auth_data not found in cookie");
       setUserId("");
     }
+<<<<<<< HEAD
 
     // Function to fetch game details
+=======
+  }, [])
+
+  // Fetch further game details on component mount
+  useEffect(() => {
+>>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
     async function getGameDetails(item_id: string) {
       // Fetch details of the game from the database
       const { data: gameDetails, error: gameDetailsError } = await supabase
@@ -97,8 +123,12 @@ const GameDetails: React.FC<Params> = ({ params }) => {
         .select("*")
         .eq("id", item_id);
 
+<<<<<<< HEAD
       console.log(gameDetails![0]);
       setCover(gameDetails![0].cover);
+=======
+      setCover(gameDetails![0].cover); 
+>>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
 
       // Prepare data for fetching additional details
       const bodyData = { type: params[0], api_id: gameDetails![0].api_id };
@@ -115,11 +145,15 @@ const GameDetails: React.FC<Params> = ({ params }) => {
         }
       );
       const data = await response.json();
+<<<<<<< HEAD
       console.log(data);
+=======
+>>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
 
       // Set the results and update loading state
       setResults(data[0]);
       setIsLoading(false);
+<<<<<<< HEAD
       console.log(resultsRef.current);
       return data;
     }
@@ -129,6 +163,13 @@ const GameDetails: React.FC<Params> = ({ params }) => {
     getGameDetails(params[1]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array ensures this runs only once when the component mounts
+=======
+      return data;
+    }
+    getGameDetails(params[1]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params]); // Empty dependency array ensures this runs only once when the component mounts
+>>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
 
   return (
     <div className="flex flex-col h-4/5 min-h-[1200px] w-full rounded-xl text-primary">

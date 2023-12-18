@@ -35,8 +35,16 @@ const Home = () => {
     return data;
   }
 
+<<<<<<< HEAD
   function handleRefresh() {
     setRefresh(true);
+=======
+  async function handleRefresh() {
+    setRefresh(true);
+    const results = await getRandomItem();
+    setResult(results);
+    setParams([resultsRef.current.type, resultsRef.current.id]);
+>>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
   }
 
   function getComponent(type: string) {
@@ -62,6 +70,7 @@ const Home = () => {
   }
 
   useEffect(() => {
+<<<<<<< HEAD
     if (resultsRef.current.type === "bungus" || refreshRef.current === true) {
       setup().then(() => {
         setIsLoaded(true);
@@ -74,6 +83,15 @@ const Home = () => {
       setIsLoaded(results);
     }
   }, [refresh]);
+=======
+    if (resultsRef.current.type === "bungus") {
+      setup().then(() => {
+        setIsLoaded(true);
+      });
+      setRefresh(false);
+    } 
+  }, []);
+>>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
   return (
     <div className="flex flex-col h-4/5 min-h-[1200px] w-full rounded-xl text-primary">
       <Header />
