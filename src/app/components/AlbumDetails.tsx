@@ -20,7 +20,7 @@ const AlbumDetails: React.FC<Params> = ({ params }) => {
   wiki: string
 }
   // State management for various purposes
-  const [results, setResults, resultsRef] = useState<object[]>([]); // Stores fetched data, its setter, and a ref
+  const [results, setResults, resultsRef] = useState<any>([]); // Stores fetched data, its setter, and a ref
   const [isLoading, setIsLoading, isLoadingRef] = useState(true); // Manages loading state
   const [cover, setCover] = useState(""); // Stores album cover URL
   const [alreadyInLib, setAlreadyInLib, alreadyInLibRef] = useState(false); // State to check if book is already in library

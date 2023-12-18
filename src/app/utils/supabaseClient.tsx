@@ -1,7 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = 'https://ipnapqmthbujbenodphz.supabase.co' 
-const supabase = createClient(supabaseUrl, process.env.NEXT_PUBLIC_SUPABASE_KEY, {
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY;
+if (!supabaseKey) {
+  throw new Error("Missing supabase key")
+}
+const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,

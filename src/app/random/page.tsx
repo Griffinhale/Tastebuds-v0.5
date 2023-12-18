@@ -14,13 +14,13 @@ import { get } from "http";
 
 const Home = () => {
   const [isLoaded, setIsLoaded, isLoadedRef] = useState(false);
-  const [results, setResult, resultsRef] = useState({
+  const [results, setResult, resultsRef] = useState<any>({
     type: "bungus",
   });
   const [refresh, setRefresh, refreshRef] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  const [params, setParams, paramsRef] = useState([]);
+  const [params, setParams, paramsRef] = useState<any>([]);
   const Loading = () => {
     return <p>Loading...</p>;
   };

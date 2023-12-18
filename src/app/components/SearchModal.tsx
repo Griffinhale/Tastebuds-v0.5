@@ -12,7 +12,7 @@ onClose: () => void;
 // Define a SearchModal component
 const SearchModal: React.FC<SearchModalProps> = ({ show, onClose, result }) => {
   const [detailsLink, setDetailsLink, detailsLinkRef] = useState("");
-  const modalRef = useRef();
+  const modalRef = useRef<any>();
 
   // useEffect hook for handling clicks outside of the modal
   useEffect(() => {

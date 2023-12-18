@@ -14,7 +14,7 @@ interface Params {
 // BookDetails component declaration using destructuring to extract params from props
 const BookDetails: React.FC<Params> = ({ params }) => {
   // State declarations for various aspects of the component
-  const [results, setResults, resultsRef] = useState([]); // State to hold book details
+  const [results, setResults, resultsRef] = useState<any>([]); // State to hold book details
   const [isLoading, setIsLoading, isLoadingRef] = useState(true); // State to track loading status
   const [alreadyInLib, setAlreadyInLib, alreadyInLibRef] = useState(false); // State to check if book is already in library
   const [addedToLib, setAddedToLib, addedToLibRef] = useState(false); // State to check if book was added to library

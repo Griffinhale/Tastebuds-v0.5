@@ -13,7 +13,7 @@ interface Params {
 // Define a component to display game details
 const GameDetails: React.FC<Params> = ({ params }) => {
   // useStateRef is used to create state variables along with references to them
-  const [results, setResults, resultsRef] = useState([]);
+  const [results, setResults, resultsRef] = useState<any>([]);
   const [isLoading, setIsLoading, isLoadingRef] = useState(true);
   const [alreadyInLib, setAlreadyInLib, alreadyInLibRef] = useState(false);
   const [addedToLib, setAddedToLib, addedToLibRef] = useState(false);

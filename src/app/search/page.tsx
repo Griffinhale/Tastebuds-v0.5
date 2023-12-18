@@ -3,12 +3,13 @@ import { useRouter, usePathname } from 'next/navigation';
 import HomePage from "../components/HomePage"
 import Library from '../components/Library';
 import SearchResults from '../components/SearchResults';
+let PageComponent: React.FC;
 
 const Home = () => {
   const router = useRouter();
   const pathname = usePathname() || '';
 
-  let PageComponent;
+  
 if (router) {
   switch (true) {
     case pathname === '/':

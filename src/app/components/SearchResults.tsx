@@ -11,7 +11,7 @@ import extractDataFromCookie from "../utils/extractCookie";
 import toast from "react-hot-toast";
 
 // Define a SearchResult component
-const SearchResult = ({ result, userId }) => {
+const SearchResult = ({ result, userId } : {result: any, userId: string}) => {
   // State management for modal and library status
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [alreadyInLib, setAlreadyInLib, alreadyInLibRef] = useState(false);
@@ -143,11 +143,11 @@ const SearchResult = ({ result, userId }) => {
 
 const SearchResults = () => {
   // State management for search results, loading status, and other variables
-  const [results, setResults, resultsRef] = useState([]);
+  const [results, setResults, resultsRef] = useState<any>([]);
   const [isLoading, setIsLoading, isLoadingRef] = useState(false);
   const [category, setCategory, categoryRef] = useState("Your Library");
   const [userId, setUserId, userIdRef] = useState("");
-  const [page, setPage, pageRef] = useState(0 | Number); // Initialize page number
+  const [page, setPage, pageRef] = useState(0); // Initialize page number
   const [endOfResults, setEndofResults, endOfResultsRef] = useState(false); // To track if there are more results to load
   const router = useRouter(); // useRouter hook for navigation
   const [IGDBTwitchBearer, setIGDBTwitchBearer, IGDBTwitchBearerRef] =
@@ -218,7 +218,7 @@ const SearchResults = () => {
           setResults((prevResults: any[]) => {
             // Filter out duplicate items and append new data
             const uniqueData = data.filter(
-              (d) => !prevResults.some((p) => p.api_id === d.api_id)
+              (d: any) => !prevResults.some((p) => p.api_id === d.api_id)
             );
             return [...prevResults, ...uniqueData]; // Update the results state
           });
@@ -271,7 +271,7 @@ const SearchResults = () => {
         setResults((prevResults: any[]) => {
           // Filter out duplicate items and append new data
           const uniqueData = data.filter(
-            (d) => !prevResults.some((p) => p.id === d.id)
+            (d: any) => !prevResults.some((p) => p.id === d.id)
           );
           return [...prevResults, ...uniqueData]; // Update the results state
         });
@@ -331,7 +331,7 @@ const SearchResults = () => {
       setResults((prevResults: any[]) => {
         // Filter out duplicate items and append new data
         const uniqueData = data.filter(
-          (d) => !prevResults.some((p) => p.id === d.id)
+          (d: any) => !prevResults.some((p) => p.id === d.id)
         );
         return [...prevResults, ...uniqueData]; // Update the results state
       });
@@ -371,7 +371,7 @@ const SearchResults = () => {
         setResults((prevResults: any[]) => {
           // Filter out duplicate items and append new data
           const uniqueData = data.filter(
-            (d) => !prevResults.some((p) => p.id === d.id)
+            (d: any) => !prevResults.some((p) => p.id === d.id)
           );
           return [...prevResults, ...uniqueData]; // Update the results state
         });
@@ -414,7 +414,7 @@ const SearchResults = () => {
   }, [category, term]); // Dependencies for useCallback
 
   // Custom debounce hook
-  const useDebounce = (func, delay) => {
+  const useDebounce = (func: any, delay: any) => {
     const callback = useRef(func); // useRef to store the function
 
     useEffect(() => {
@@ -422,7 +422,7 @@ const SearchResults = () => {
     }, [func]); // Dependency on function
 
     return useCallback(
-      (...args) => {
+      (...args: any) => {
         const currentCallback = callback.current;
         clearTimeout(callback.current.timer); // Clear previous timer
         callback.current.timer = setTimeout(() => {
@@ -568,7 +568,7 @@ const SearchResults = () => {
           </div>
         ) : (
           <div className="relative grid md:grid-cols-2 lg:grid-cols-3 grid-cols-1 4xl:grid-cols-8 3xl:grid-cols-6 xl:grid-cols-5 py-8 space-x-4 mx-4">
-            {resultsRef.current.map((result, index) => {
+            {resultsRef.current.map((result: any, index: number) => {
               return (
                 <SearchResult
                   key={result.id || index}

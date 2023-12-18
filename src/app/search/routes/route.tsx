@@ -94,11 +94,10 @@ async function handleBookSearch(body: { term: string; page: number }) {
       if (newBookError) {
         console.log("error inserting book: ", newBookError);
         return;
+      } else if (newBook) {
+        return newBook[0].id;
       }
-      console.log(newBook[0].id);
-      return newBook[0].id;
     } else {
-      console.log("existing book", existingBooks[0].id);
       return existingBooks[0].id;
     }
   }
@@ -132,19 +131,7 @@ async function handleBookSearch(body: { term: string; page: number }) {
             book.volumeInfo.imageLinks
         )
         .map(
-          async (book: {
-            cover: any;
-            volumeInfo: {
-              imageLinks: { thumbnail: any };
-              title: any;
-              description: any;
-            };
-            api_id: any;
-            id: any;
-            title: any;
-            description: any;
-            type: string;
-          }) => {
+          async (book: any) => {
             book.cover = book.volumeInfo.imageLinks.thumbnail;
             book.api_id = book.id;
             book.title = book.volumeInfo.title;
@@ -234,22 +221,12 @@ async function handleVideoSearch(body: { term: string; page: number }) {
     const response = await fetch(searchURL, options);
     const data = await response.json();
     if (
-      data.results.filter((video) => video.media_type !== "person").length > 0
+      data.results.filter((video: any) => video.media_type !== "person").length > 0
     ) {
       const resultsPromises = data.results
         .filter((video: { poster_path: any }) => video.poster_path)
         .map(
-          async (video: {
-            description: any;
-            overview: any;
-            title: any;
-            name: any;
-            cover: string;
-            poster_path: string;
-            api_id: any;
-            id: any;
-            type: string;
-          }) => {
+          async (video: any) => {
             // Process and insert each video into the database
             video.description = video.overview;
             if (!video.title) {
@@ -437,6 +414,9 @@ async function handleGameSearch(body: { term: string; page: number }) {
         "\nbody: " +
         bodyData
     );
+    if (!igdbIdKey) {
+      throw new Error("no igdb api key")
+    }
     // Fetch game data from IGDB API
     const response = await fetch(url, {
       method: "POST",
@@ -458,16 +438,7 @@ async function handleGameSearch(body: { term: string; page: number }) {
       let resultsPromises = data
         .filter((game: { cover: undefined }) => game.cover !== undefined)
         .map(
-          async (game: {
-            title: any;
-            name: any;
-            cover: { url: string };
-            api_id: any;
-            id: any;
-            type: string;
-            description: any;
-            summary: any;
-          }) => {
+          async (game: any) => {
             // Process and insert each game into the database
             game.title = game.name;
             game.cover = game.cover.url.replace("t_thumb", "t_cover_big");

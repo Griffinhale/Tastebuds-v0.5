@@ -11,7 +11,7 @@ const LogInPage = () => {
   const [userId, setUserId, userIdRef] = useState("");
 
   // Function to handle user sign up
-  const handleSignup = async (e) => {
+  const handleSignup = async (e: any) => {
     e.preventDefault(); // Prevent the default form submission behavior
 
     // Get form data
@@ -40,7 +40,7 @@ const LogInPage = () => {
   };
 
   // Function to handle user login
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: any) => {
     // Get form data
     const form = e.target;
     const formData = new FormData(form);

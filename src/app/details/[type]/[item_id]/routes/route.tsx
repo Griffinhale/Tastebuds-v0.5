@@ -3,6 +3,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { BsFileBreakFill } from "react-icons/bs";
 let igdbTwitchBearer = "";
 
+//type declarations
+interface AlbumRequest {
+  type: string;
+  artist: string;
+  album: string;
+}
+
+
 // Function to get Twitch access token for IGDB API
 async function getTwitchKeys() {
   // Retrieve IGDB keys from environment variables
@@ -46,11 +54,7 @@ export async function POST(req: NextRequest) {
   });
 }
 
-interface AlbumRequest {
-  type: string;
-  artist: string;
-  album: string;
-}
+
 // Function to handle album details
 async function handleAlbumDetails(body: AlbumRequest){
   // Construct URL for album details
@@ -78,7 +82,7 @@ async function handleAlbumDetails(body: AlbumRequest){
 }
 
 // Function to handle book details
-async function handleBookDetails(body: Request) {
+async function handleBookDetails(body: any) {
   // Construct URL for book details
   const searchURL = `https://www.googleapis.com/books/v1/volumes/${body.api_id}?key=${process.env.GOOGLE_API_KEY}`
   // Fetch book details
@@ -89,55 +93,57 @@ async function handleBookDetails(body: Request) {
 }
 
 // Function to handle game details
-async function handleGameDetails(body: Request) {
+async function handleGameDetails(body: any) {
   // Retrieve Twitch bearer token if not already retrieved
   if (igdbTwitchBearer === "") {
     igdbTwitchBearer = await getTwitchKeys();
     console.log(igdbTwitchBearer)
   }
   const igdbIdKey = process.env.IGDB_ID_KEY;
-
-  try {
-    // Construct body data for IGDB API request
-    const bodyData = `fields *, age_ratings.*, cover.*, collection.*, alternative_names.*, involved_companies.*,  external_games.*, genres.*, keywords.*, platforms.*, similar_games.*, release_dates.*, tags, websites.*; where id = ${body.api_id};`;
-    const url = "https://api.igdb.com/v4/games";
-
-    // Fetch game details
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Client-ID": igdbIdKey,
-        Authorization: "Bearer " + igdbTwitchBearer,
-      },
-      body: bodyData,
-    });
-
-    const data = await response.json();
-    console.log(data);
-    // Additional request for company details if needed
-    const bodyData2 =  `fields *; where changed_company_id=${data.involved_companies?data.involved_companies[0].id:""};`
-    const url2 = "https://api.igdb.com/v4/companies";
-
-    const response2 = await fetch(url2, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Client-ID": igdbIdKey,
-        Authorization: "Bearer " + igdbTwitchBearer,
-      },
-      body: bodyData2,
-    })
-    const data2 = await response2.json();
-    console.log("2",data2);
-    return data;
-  } catch (error) {
-    console.log(error);
+  if (igdbIdKey) {
+    try {
+      // Construct body data for IGDB API request
+      const bodyData = `fields *, age_ratings.*, cover.*, collection.*, alternative_names.*, involved_companies.*,  external_games.*, genres.*, keywords.*, platforms.*, similar_games.*, release_dates.*, tags, websites.*; where id = ${body.api_id};`;
+      const url = "https://api.igdb.com/v4/games";
+  
+      // Fetch game details
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Client-ID": igdbIdKey,
+          Authorization: "Bearer " + igdbTwitchBearer,
+        },
+        body: bodyData,
+      });
+  
+      const data = await response.json();
+      console.log(data);
+      // Additional request for company details if needed
+      const bodyData2 =  `fields *; where changed_company_id=${data.involved_companies?data.involved_companies[0].id:""};`
+      const url2 = "https://api.igdb.com/v4/companies";
+  
+      const response2 = await fetch(url2, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Client-ID": igdbIdKey,
+          Authorization: "Bearer " + igdbTwitchBearer,
+        },
+        body: bodyData2,
+      })
+      const data2 = await response2.json();
+      console.log("2",data2);
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
   }
+  
 }
 
 // Function to handle video details
-async function handleVideoDetails(body: Request) {
+async function handleVideoDetails(body: any) {
   let searchURL: string = "";
   // Retrieve TMDB API keys from environment variables
   const tmdbAuthHeader = process.env.TMDB_AUTH_HEADER

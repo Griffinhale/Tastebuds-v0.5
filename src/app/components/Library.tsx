@@ -7,7 +7,7 @@ import supabase from "../utils/supabaseClient";
 import extractDataFromCookie from "../utils/extractCookie";
 
 // Define a component to display an item in a library
-const LibraryItem = ({ result }) => {
+const LibraryItem = ({ result }: any) => {
   // State to manage modal visibility
   const [isModalOpen, setIsModalOpen, isModalOpenRef] = useState(false);
   
@@ -24,7 +24,7 @@ const LibraryItem = ({ result }) => {
   };
 
   // Function to get button style based on the type of item
-  const getButtonStyle = (type) => {
+  const getButtonStyle = (type: string) => {
     // Return specific styles for different item types
     if (type === "book") {
       return "items-center justify-center h-80 flex flex-col  mx-2 px-2 hover:ring-4 rounded-full relative bg-red-500/30";
@@ -38,7 +38,7 @@ const LibraryItem = ({ result }) => {
   };
 
   // Function to get image style based on the type of item
-  const getImgStyle = (type) => {
+  const getImgStyle = (type: string) => {
     // Return specific styles for different item types
     if (type === "book") {
       return "w-45 h-60 rounded-xl overflow-hidden";
@@ -69,13 +69,15 @@ const LibraryItem = ({ result }) => {
           </h1>
         </div>
       </button>
-      <SearchModal
-        className="w-[20%]"
-        result={result.items}
-        show={isModalOpenRef.current}
-        onBlur={handleCloseModal}
-        onClose={handleCloseModal}
-      />
+      <div className="w-[20%]">
+        <SearchModal
+          result={result.items}
+          show={isModalOpenRef.current}
+          onBlur={handleCloseModal}
+          onClose={handleCloseModal}
+        />
+      </div>
+      
     </div>
   );
 };
@@ -83,11 +85,11 @@ const LibraryItem = ({ result }) => {
 // Define a component to display a library of items
 const Library = () => {
   // State for storing library items and user ID
-  const [results, setResults, resultsRef] = useState([]);
+  const [results, setResults, resultsRef] = useState<any>([]);
   const [userId, setUserId, userIdRef] = useState("");
 
   // Function to fetch library data from the database
-  async function getLib(user_id) {
+  async function getLib(user_id: string) {
     const { data, error } = await supabase
       .from("library")
       .select("user_id, item_id, items(*)")
@@ -195,7 +197,7 @@ const Library = () => {
             </div>
             <div className="grid space-x-4 grid-cols-5 py-4">
               {resultsRef.current.length > 0 ? (
-                resultsRef.current.map((result, index) => {
+                resultsRef.current.map((result: any, index: number) => {
                   return (
                     <LibraryItem key={result.id || index} result={result} />
                   );

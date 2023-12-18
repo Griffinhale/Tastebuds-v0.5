@@ -14,7 +14,7 @@ import VideoDetails from "@/app/components/VideoDetails";
 const Home = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const params = pathname.split("/").slice(2);
+  const params: any = pathname.split("/").slice(2);
   
   let PageComponent;
 

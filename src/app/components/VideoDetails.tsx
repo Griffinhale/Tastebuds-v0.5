@@ -13,7 +13,7 @@ interface Params {
 // Component for displaying details of a video
 const VideoDetails: React.FC<Params> = ({ params }) => {
   // State management for video details, loading status, library status, etc.
-  const [results, setResults, resultsRef] = useState([]);
+  const [results, setResults, resultsRef] = useState<any>([]);
   const [isLoading, setIsLoading, isLoadingRef] = useState(true);
   const [alreadyInLib, setAlreadyInLib, alreadyInLibRef] = useState(false);
   const [addedToLib, setAddedToLib, addedToLibRef] = useState(false);
@@ -230,7 +230,7 @@ const VideoDetails: React.FC<Params> = ({ params }) => {
                 <div>
                   <h2>Genres:</h2>
                   {resultsRef.current.genres ? (
-                    resultsRef.current.genres.map((genre, index) => {
+                    resultsRef.current.genres.map((genre:any, index:number) => {
                       return <p key={index}>{genre.name}</p>;
                     })
                   ) : (
