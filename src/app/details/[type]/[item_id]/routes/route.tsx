@@ -1,6 +1,5 @@
 import { useSearchParams } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
-import supabase from "../../utils/supabaseClient";
 import { BsFileBreakFill } from "react-icons/bs";
 let igdbTwitchBearer = "";
 
