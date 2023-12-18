@@ -36,10 +36,6 @@ const VideoDetails: React.FC<Params> = ({ params }) => {
 
     let isInUserLibrary = false;
     if (existingItem) {
-<<<<<<< HEAD
-      console.log("check library");
-=======
->>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
       // Filter to check if the video is already in the library
       const filtered = existingItem.filter(
         (item) => item.item_id === params[1]
@@ -48,10 +44,6 @@ const VideoDetails: React.FC<Params> = ({ params }) => {
         isInUserLibrary = true;
         setAddedToLib(true);
         setAlreadyInLib(true);
-<<<<<<< HEAD
-        console.log("already in library");
-=======
->>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
         toast.error("Already in Library!");
       }
     } else if (existingItemError) {
@@ -75,34 +67,19 @@ const VideoDetails: React.FC<Params> = ({ params }) => {
       }
     }
   };
-<<<<<<< HEAD
-
-  // useEffect hook to load video details on component mount
-  useEffect(() => {
-    // Extract user data from cookie
-    const data = extractDataFromCookie();
-    if (data) {
-      console.log("UserId:", data.userId);
-      console.log("ScreenName:", data.screenName);
-=======
   // Extract user data from cookie
   useEffect(() => {
     const data = extractDataFromCookie();
     if (data) {
->>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
       setUserId(data.userId);
     } else {
       console.log("auth_data not found in cookie");
       setUserId("");
     }
-<<<<<<< HEAD
-
-=======
   }, [])
 
   // Fetch video details on component mount
   useEffect(() => {
->>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
     // Function to fetch video details
     async function getVideoDetails(item_id: string) {
       // Fetch video details from the database
@@ -111,10 +88,6 @@ const VideoDetails: React.FC<Params> = ({ params }) => {
         .select("*")
         .eq("id", item_id);
 
-<<<<<<< HEAD
-      console.log(videoDetails![0]);
-=======
->>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
       setCover(videoDetails![0].cover); // Set cover image
 
       // Prepare data for additional details fetch
@@ -138,19 +111,10 @@ const VideoDetails: React.FC<Params> = ({ params }) => {
       data.video_type = videoDetails![0].video_type;
       setResults(data); // Set the results state
       setIsLoading(false); // Set loading to false
-<<<<<<< HEAD
-      console.log(resultsRef.current); // Log the results for debugging
-    }
-    console.log(params); // Log params for debugging
-    getVideoDetails(params[1]); // Call the function to get video details
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array ensures this effect runs only once on mount
-=======
     }
     getVideoDetails(params[1]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]); // Rerun this effect when params state changes
->>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
 
   if (resultsRef.current.video_type === "tv") {
     return (

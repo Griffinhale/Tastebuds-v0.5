@@ -77,19 +77,11 @@ const AlbumDetails: React.FC<Params> = ({ params }) => {
     }
   };
 
-<<<<<<< HEAD
-  useEffect(() => {
-    // Extract user data from cookies
-    const data = extractDataFromCookie();
-    if (data) {
-      setUserId(data.userId); // Set user ID from extracted data
-=======
   // Extract user data from cookies
   useEffect(() => { 
     const data = extractDataFromCookie();
     if (data) {
       setUserId(data.userId); // Set user ID state from extracted data
->>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
     } else {
       console.log("auth_data not found in cookie");
       setUserId(""); // Clear user ID if auth data not found
@@ -97,18 +89,10 @@ const AlbumDetails: React.FC<Params> = ({ params }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-<<<<<<< HEAD
-  // useEffect hook to handle side effects
-  useEffect(() => {
-    // Asynchronous function to get album details from the database
-    async function getAlbumDetails(item_id: string) {
-      // Fetching album details from Supabase
-=======
   // Fetch further details from API
   useEffect(() => {
     async function getAlbumDetails(item_id: string) {
       // Fetching base album details from Supabase
->>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
       const { data: albumDetails, error: albumDetailsError } = await supabase
         .from("items")
         .select("*")
@@ -133,20 +117,6 @@ const AlbumDetails: React.FC<Params> = ({ params }) => {
         }
       );
       const data = await response.json();
-<<<<<<< HEAD
-      setResults(data);
-      setIsLoading(false);
-      console.log(resultsRef.current[0].album.artist);
-      return data;
-    }
-
-    // Executing functions when the component mounts
-    
-    getAlbumDetails(params[1]);
-    
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array means this runs once on mount
-=======
       if (data.error) {
         toast.error("No details found, try again");
         return;
@@ -159,7 +129,6 @@ const AlbumDetails: React.FC<Params> = ({ params }) => {
     const details = getAlbumDetails(params[1]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]); // Rerun effect when params state changes
->>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
 
   // JSX for rendering the component
   return (

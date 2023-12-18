@@ -1,9 +1,5 @@
 import { useSearchParams } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
-<<<<<<< HEAD
-import supabase from "../../utils/supabaseClient";
-=======
->>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
 import { BsFileBreakFill } from "react-icons/bs";
 let igdbTwitchBearer = "";
 
@@ -50,17 +46,6 @@ export async function POST(req: NextRequest) {
   });
 }
 
-<<<<<<< HEAD
-// Function to handle album details
-async function handleAlbumDetails(body){
-  // Construct URL for album details
-  const searchURL = `http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=${process.env.LAST_FM_KEY}&artist=${body.artist}&album=${body.album}&format=json`;
-  // Fetch album details
-  const response = await fetch(searchURL)
-  const data = await response.json()
-  
-  console.log(typeof data);
-=======
 interface AlbumRequest {
   type: string;
   artist: string;
@@ -89,16 +74,11 @@ async function handleAlbumDetails(body: AlbumRequest){
   const data = await response.json()
   
   console.log("post api call", data);
->>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
   return [data];
 }
 
 // Function to handle book details
-<<<<<<< HEAD
-async function handleBookDetails(body) {
-=======
 async function handleBookDetails(body: Request) {
->>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
   // Construct URL for book details
   const searchURL = `https://www.googleapis.com/books/v1/volumes/${body.api_id}?key=${process.env.GOOGLE_API_KEY}`
   // Fetch book details
@@ -109,11 +89,7 @@ async function handleBookDetails(body: Request) {
 }
 
 // Function to handle game details
-<<<<<<< HEAD
-async function handleGameDetails(body) {
-=======
 async function handleGameDetails(body: Request) {
->>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
   // Retrieve Twitch bearer token if not already retrieved
   if (igdbTwitchBearer === "") {
     igdbTwitchBearer = await getTwitchKeys();
@@ -161,11 +137,7 @@ async function handleGameDetails(body: Request) {
 }
 
 // Function to handle video details
-<<<<<<< HEAD
-async function handleVideoDetails(body) {
-=======
 async function handleVideoDetails(body: Request) {
->>>>>>> 3337dd78b6a8ea6d819c47b94bc1d068d6e4522d
   let searchURL: string = "";
   // Retrieve TMDB API keys from environment variables
   const tmdbAuthHeader = process.env.TMDB_AUTH_HEADER
