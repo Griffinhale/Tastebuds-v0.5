@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import { JSXElementConstructor, Key, PromiseLikeOfReactNode, ReactElement, ReactNode, ReactPortal, useEffect } from "react";
 import useState from "react-usestateref";
@@ -76,6 +77,7 @@ const VideoDetails: React.FC<Params> = ({ params }) => {
       console.log("auth_data not found in cookie");
       setUserId("");
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Fetch video details on component mount

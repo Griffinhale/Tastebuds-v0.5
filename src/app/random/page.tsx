@@ -71,6 +71,7 @@ const Home = () => {
       });
       setRefresh(false);
     } 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
     <div className="flex flex-col h-4/5 min-h-[1200px] w-full rounded-xl text-primary">

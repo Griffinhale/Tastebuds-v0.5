@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
@@ -111,7 +113,7 @@ const SearchResult = ({ result, userId } : {result: any, userId: string}) => {
     <div className="py-4">
       <button onClick={handleOpenModal} className={getButtonStyle(result.type)}>
         <div>
-          <img className={getImgStyle(result.type)} src={result.cover} />
+          <img className={getImgStyle(result.type)} src={result.cover} alt={result.title}/>
         </div>
         <h2>{result.title}</h2>
       </button>

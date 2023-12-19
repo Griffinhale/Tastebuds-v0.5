@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 // Use client-side rendering for this component
 "use client";
 

@@ -81,6 +81,7 @@ const LogInPage = () => {
     }
 
     checkLogin(); // Call the checkLogin function
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Missing dependency array, which might cause this effect to run on every re-render
 
   return (

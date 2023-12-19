@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client"; // Directive to ensure this code runs on the client side in a Next.js application
 import { JSXElementConstructor, Key, PromiseLikeOfReactNode, ReactElement, ReactNode, ReactPortal, useEffect } from "react"; // Import useEffect hook from React for handling side effects
 import useState from "react-usestateref"; // Import custom useState hook that provides a ref to the state
@@ -132,6 +133,7 @@ const BookDetails: React.FC<Params> = ({ params }) => {
       console.log("auth_data not found in cookie");
       setUserId("");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Grab further details on component mount

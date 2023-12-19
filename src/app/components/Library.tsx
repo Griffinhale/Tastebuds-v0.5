@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import { useEffect } from "react";
 import useState from "react-usestateref";
@@ -116,6 +117,7 @@ const Library = () => {
       console.log("auth_data not found in cookie");
       setUserId("");
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array ensures this effect runs only once on mount
   return (
     <div className="flex flex-col h-4/5 min-h-[1200px] w-full rounded-xl text-primary">

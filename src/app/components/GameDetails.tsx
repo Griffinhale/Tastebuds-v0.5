@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import { JSXElementConstructor, Key, PromiseLikeOfReactNode, ReactElement, ReactNode, ReactPortal, useEffect } from "react";
 import useState from "react-usestateref";
@@ -80,6 +81,7 @@ const GameDetails: React.FC<Params> = ({ params }) => {
       console.log("auth_data not found in cookie");
       setUserId("");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Fetch further game details on component mount
