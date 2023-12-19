@@ -344,7 +344,7 @@ const SearchResults = () => {
     try {
       console.log("server call");
       // Make a POST request to fetch games
-      const res = await fetch("http://localhost:3000/search/routes", {
+      const res = await fetch("search/routes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
