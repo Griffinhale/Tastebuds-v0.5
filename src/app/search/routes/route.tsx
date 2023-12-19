@@ -9,6 +9,9 @@ async function getTwitchKeys() {
   // Retrieve IGDB keys from environment variables
   const igdbIdKey = process.env.IGDB_ID_KEY;
   const igdbSecretKey = process.env.IGDB_SECRET_KEY;
+  if (!igdbIdKey || !igdbSecretKey) {
+    throw new Error("missing api keys")
+  }
   // Construct URL for obtaining the bearer token
   const bearerURL = `https://id.twitch.tv/oauth2/token?client_id=${igdbIdKey}&client_secret=${igdbSecretKey}&grant_type=client_credentials`;
 
