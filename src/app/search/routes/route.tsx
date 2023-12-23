@@ -10,7 +10,7 @@ async function getTwitchKeys() {
   const igdbIdKey = process.env.IGDB_ID_KEY;
   const igdbSecretKey = process.env.IGDB_SECRET_KEY;
   if (!igdbIdKey || !igdbSecretKey) {
-    throw new Error("missing api keys")
+    throw new Error("missing api keys");
   }
   // Construct URL for obtaining the bearer token
   const bearerURL = `https://id.twitch.tv/oauth2/token?client_id=${igdbIdKey}&client_secret=${igdbSecretKey}&grant_type=client_credentials`;
@@ -60,51 +60,6 @@ export async function POST(req: NextRequest) {
 
 // Function to handle book search and insert new books into database
 async function handleBookSearch(body: { term: string; page: number }) {
-  // Function to insert a book into the database if it doesn't exist
-  async function insertBook(book: {
-    api_id: any;
-    title: any;
-    description: any;
-    cover: any;
-    volumeInfo: { authors: any[] };
-  }) {
-    // Check if the book already exists in the database
-    const { data: existingBooks, error: existingBooksError } = await supabase
-      .from("items")
-      .select("*")
-      .eq("api_id", book.api_id);
-
-    if (existingBooksError) {
-      console.log("Error checking for existing books: ", existingBooksError);
-      return;
-    }
-
-    // If the book doesn't exist, insert it into the database
-    if (existingBooks.length === 0) {
-      let { data: newBook, error: newBookError } = await supabase
-        .from("items")
-        .insert([
-          {
-            api_id: book.api_id,
-            title: book.title,
-            description: book.description ? book.description : "",
-            cover: book.cover,
-            creator: book.volumeInfo.authors ? book.volumeInfo.authors[0] : "",
-            type: "book",
-          },
-        ])
-        .select();
-      if (newBookError) {
-        console.log("error inserting book: ", newBookError);
-        return;
-      } else if (newBook) {
-        return newBook[0].id;
-      }
-    } else {
-      return existingBooks[0].id;
-    }
-  }
-
   // Construct the URL for Google Books API search
   const googleApiKey = process.env.GOOGLE_API_KEY;
   const searchURL = `https://www.googleapis.com/books/v1/volumes?q=intitle:${
@@ -122,37 +77,85 @@ async function handleBookSearch(body: { term: string; page: number }) {
   );
 
   try {
-    // Fetch book data from Google Books API
-    const response = await fetch(searchURL);
+    const response = await fetch(searchURL); // Construct and execute the search URL as before
     const data = await response.json();
 
-    // Process and return the search results
     if (data.items) {
-      const resultsPromises = data.items
-        .filter(
-          (book: { volumeInfo: { imageLinks: any } }) =>
-            book.volumeInfo.imageLinks
-        )
-        .map(
-          async (book: any) => {
-            book.cover = book.volumeInfo.imageLinks.thumbnail;
-            book.api_id = book.id;
-            book.title = book.volumeInfo.title;
-            book.description = book.volumeInfo.description
-              ? book.volumeInfo.description
-              : "";
-            book.id = await insertBook(book); // Insert book into the database
-            book.type = "book";
-            return book;
-          }
+      // Prepare books for checking in the database
+      const booksForCheck = data.items
+        .filter((book: any) => book.volumeInfo.imageLinks)
+        .map((book: any) => ({
+          api_id: book.id,
+          title: book.volumeInfo.title,
+          cover: book.volumeInfo.imageLinks.thumbnail,
+          description: book.volumeInfo.description || "",
+          type: "book",
+        }));
+
+      // Collect all api_ids for a batch check
+      const apiIds = booksForCheck.map((book: any) => book.api_id);
+
+      // Check for existing books in a batch
+      const { data: existingBooks, error: existingBooksError } = await supabase
+        .from("items")
+        .select("api_id, id")
+        .in("api_id", apiIds);
+
+      if (existingBooksError) {
+        console.error(
+          "Error checking for existing books: ",
+          existingBooksError
         );
-      const results = await Promise.all(resultsPromises);
-      return results;
+        return;
+      }
+
+      // Ensure existingBooks is an array
+      const existingBookRecords = existingBooks || [];
+
+      // Determine which books need to be inserted
+      const newBooks = booksForCheck.filter(
+        (book: any) =>
+          !existingBookRecords.find((eBook) => eBook.api_id === book.api_id)
+      );
+
+      // Insert new books in a batch
+      let insertedBooks: any = [];
+      if (newBooks.length > 0) {
+        const { data: insertedData, error: insertError } = await supabase
+          .from("items")
+          .insert(newBooks);
+
+        if (insertError) {
+          console.error("Error inserting new books: ", insertError);
+          return;
+        }
+
+        insertedBooks = insertedData || [];
+      }
+
+      // Combine existing and new books, ensuring cover and api_id are included
+  const combinedBooks = data.items.map((apiBook) => {
+    // Find the corresponding book record from the database
+    const dbBook = existingBookRecords.find((eBook) => eBook.api_id === apiBook.id) ||
+                   insertedBooks.find((iBook) => iBook.api_id === apiBook.id);
+
+    // Merge the API book data with the database record
+    return {
+      ...apiBook, // Original data from the Google Books API
+      cover: dbBook?.cover || apiBook.volumeInfo.imageLinks?.thumbnail, // Use cover from DB if available
+      api_id: dbBook?.api_id || apiBook.id, // Include api_id
+      id: dbBook?.id, // Include the UUID id from the database
+      title: dbBook?.title || apiBook.volumeInfo.title,
+      type: "book",
+    };
+  });
+
+  return combinedBooks;
     } else {
       return [{ items: false }];
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 }
 // Function to handle video search and insert new videos into database
@@ -224,25 +227,24 @@ async function handleVideoSearch(body: { term: string; page: number }) {
     const response = await fetch(searchURL, options);
     const data = await response.json();
     if (
-      data.results.filter((video: any) => video.media_type !== "person").length > 0
+      data.results.filter((video: any) => video.media_type !== "person")
+        .length > 0
     ) {
       const resultsPromises = data.results
         .filter((video: { poster_path: any }) => video.poster_path)
-        .map(
-          async (video: any) => {
-            // Process and insert each video into the database
-            video.description = video.overview;
-            if (!video.title) {
-              video.title = video.name;
-            }
-            delete video.overview;
-            video.cover = "https://image.tmdb.org/t/p/w500" + video.poster_path;
-            video.api_id = video.id;
-            video.id = await insertVideo(video);
-            video.type = "video";
-            return video;
+        .map(async (video: any) => {
+          // Process and insert each video into the database
+          video.description = video.overview;
+          if (!video.title) {
+            video.title = video.name;
           }
-        );
+          delete video.overview;
+          video.cover = "https://image.tmdb.org/t/p/w500" + video.poster_path;
+          video.api_id = video.id;
+          video.id = await insertVideo(video);
+          video.type = "video";
+          return video;
+        });
       const results = await Promise.all(resultsPromises);
       return results;
     } else {
@@ -418,7 +420,7 @@ async function handleGameSearch(body: { term: string; page: number }) {
         bodyData
     );
     if (!igdbIdKey) {
-      throw new Error("no igdb api key")
+      throw new Error("no igdb api key");
     }
     // Fetch game data from IGDB API
     const response = await fetch(url, {
@@ -432,7 +434,7 @@ async function handleGameSearch(body: { term: string; page: number }) {
     });
 
     const data = await response.json();
-    
+
     let results;
     if (
       data.filter((game: { cover: undefined }) => game.cover !== undefined)
@@ -440,18 +442,16 @@ async function handleGameSearch(body: { term: string; page: number }) {
     ) {
       let resultsPromises = data
         .filter((game: { cover: undefined }) => game.cover !== undefined)
-        .map(
-          async (game: any) => {
-            // Process and insert each game into the database
-            game.title = game.name;
-            game.cover = game.cover.url.replace("t_thumb", "t_cover_big");
-            game.api_id = game.id;
-            game.id = await insertGame(game);
-            game.type = "game";
-            game.description = game.summary;
-            return game;
-          }
-        );
+        .map(async (game: any) => {
+          // Process and insert each game into the database
+          game.title = game.name;
+          game.cover = game.cover.url.replace("t_thumb", "t_cover_big");
+          game.api_id = game.id;
+          game.id = await insertGame(game);
+          game.type = "game";
+          game.description = game.summary;
+          return game;
+        });
       results = await Promise.all(resultsPromises);
     } else {
       results = [{ items: false }];
