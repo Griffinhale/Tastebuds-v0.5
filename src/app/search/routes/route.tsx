@@ -82,8 +82,8 @@ async function handleBookSearch(body: { term: string; page: number }) {
 
     if (data.items) {
       // Prepare books for checking in the database
-      const booksForCheck = data.items
-        .filter((book: any) => book.volumeInfo.imageLinks)
+      const filteredBook = data.items.filter((book: any) => book.volumeInfo.imageLinks);
+      const booksForCheck = filteredBook
         .map((book: any) => ({
           api_id: book.id,
           title: book.volumeInfo.title,
@@ -94,11 +94,11 @@ async function handleBookSearch(body: { term: string; page: number }) {
 
       // Collect all api_ids for a batch check
       const apiIds = booksForCheck.map((book: any) => book.api_id);
-
+        
       // Check for existing books in a batch
       const { data: existingBooks, error: existingBooksError } = await supabase
         .from("items")
-        .select("api_id, id")
+        .select()
         .in("api_id", apiIds);
 
       if (existingBooksError) {
@@ -117,39 +117,39 @@ async function handleBookSearch(body: { term: string; page: number }) {
         (book: any) =>
           !existingBookRecords.find((eBook) => eBook.api_id === book.api_id)
       );
-
       // Insert new books in a batch
       let insertedBooks: any = [];
       if (newBooks.length > 0) {
         const { data: insertedData, error: insertError } = await supabase
           .from("items")
-          .insert(newBooks);
+          .insert(newBooks)
+          .select();
 
         if (insertError) {
           console.error("Error inserting new books: ", insertError);
           return;
         }
-
+        
         insertedBooks = insertedData || [];
       }
 
       // Combine existing and new books, ensuring cover and api_id are included
-  const combinedBooks = data.items.map((apiBook) => {
+  const combinedBooks = filteredBook.map((apiBook: any ) => {
     // Find the corresponding book record from the database
     const dbBook = existingBookRecords.find((eBook) => eBook.api_id === apiBook.id) ||
-                   insertedBooks.find((iBook) => iBook.api_id === apiBook.id);
-
+                   insertedBooks.find((iBook: any ) => iBook.api_id === apiBook.id);
+    console.log(dbBook);
     // Merge the API book data with the database record
     return {
       ...apiBook, // Original data from the Google Books API
-      cover: dbBook?.cover || apiBook.volumeInfo.imageLinks?.thumbnail, // Use cover from DB if available
-      api_id: dbBook?.api_id || apiBook.id, // Include api_id
+      cover: dbBook?.cover, // Use cover from DB if available
+      api_id: dbBook?.api_id, // Include api_id
       id: dbBook?.id, // Include the UUID id from the database
-      title: dbBook?.title || apiBook.volumeInfo.title,
+      title: dbBook?.title,
       type: "book",
     };
   });
-
+  
   return combinedBooks;
     } else {
       return [{ items: false }];
@@ -160,47 +160,6 @@ async function handleBookSearch(body: { term: string; page: number }) {
 }
 // Function to handle video search and insert new videos into database
 async function handleVideoSearch(body: { term: string; page: number }) {
-  // Function to insert a video into the database if it doesn't exist
-  async function insertVideo(video: {
-    api_id: any;
-    title: any;
-    description: any;
-    cover: any;
-    media_type: any;
-  }) {
-    // Check if the video already exists in the database
-    const { data: existingVideos, error: existingVideosError } = await supabase
-      .from("items")
-      .select("*")
-      .eq("api_id", video.api_id);
-
-    // If the video doesn't exist, insert it into the database
-    if (existingVideos!.length === 0) {
-      const { data: newVideo, error: newVideoError } = await supabase
-        .from("items")
-        .insert([
-          {
-            api_id: video.api_id,
-            title: video.title,
-            description: video.description,
-            cover: video.cover,
-            type: "video",
-            video_type: video.media_type,
-          },
-        ])
-        .select();
-
-      if (newVideoError) {
-        console.log("\n\nERROR\n\n", newVideoError);
-        return;
-      }
-      console.log("newVideo:", newVideo);
-      return newVideo![0].id;
-    } else {
-      return existingVideos![0].id;
-    }
-  }
-
   // Construct the URL for TMDB API search
   const tmdbApiKey = process.env.TMDB_API_KEY;
   const tmdbAuthHeader = process.env.TMDB_AUTH_HEADER;
@@ -223,35 +182,82 @@ async function handleVideoSearch(body: { term: string; page: number }) {
   );
 
   try {
-    // Fetch video data from TMDB API
     const response = await fetch(searchURL, options);
     const data = await response.json();
-    if (
-      data.results.filter((video: any) => video.media_type !== "person")
-        .length > 0
-    ) {
-      const resultsPromises = data.results
-        .filter((video: { poster_path: any }) => video.poster_path)
-        .map(async (video: any) => {
-          // Process and insert each video into the database
-          video.description = video.overview;
-          if (!video.title) {
-            video.title = video.name;
-          }
-          delete video.overview;
-          video.cover = "https://image.tmdb.org/t/p/w500" + video.poster_path;
-          video.api_id = video.id;
-          video.id = await insertVideo(video);
-          video.type = "video";
-          return video;
-        });
-      const results = await Promise.all(resultsPromises);
-      return results;
+
+    if (data.results && data.results.filter((video: any) => video.media_type !== "person")
+    .length > 0) {
+      const filteredResults = data.results.filter(
+        (video: any) => video.poster_path
+      );
+      const videosForCheck = filteredResults.map((video: any) => ({
+        api_id: video.id,
+        title: video.title || video.name,
+        description: video.overview,
+        cover: "https://image.tmdb.org/t/p/w500" + video.poster_path,
+        video_type: video.media_type,
+        type: "video",
+      }));
+
+      // Collect all api_ids for a batch check
+      const apiIds = videosForCheck.map((video: any) => video.api_id);
+      // Check for existing videos in a batch
+      const { data: existingVideos, error: existingVideosError } = await supabase
+        .from("items")
+        .select()
+        .eq("api_id", apiIds)
+        
+
+      if (existingVideosError) {
+        console.error("Error checking for existing videos: ", existingVideosError);
+        return;
+      }
+
+      const existingVideoRecords = existingVideos || [];
+      // Determine which videos need to be inserted
+      const newVideos = videosForCheck.filter(
+        (video: any) => !existingVideoRecords.find((eVideo) => eVideo.api_id === video.api_id)
+      );
+
+      // Insert new videos in a batch
+      let insertedVideos: any = [];
+      if (newVideos.length > 0) {
+        const { data: insertedData, error: insertError } = await supabase
+          .from("items")
+          .insert(newVideos)
+          .select();
+
+        if (insertError) {
+          console.error("Error inserting new videos: ", insertError);
+          return;
+        }
+
+        insertedVideos = insertedData || [];
+    
+      }
+
+      // Combine existing and new videos
+      const combinedVideos = videosForCheck.map((apiVideo: any) => {
+        const dbVideo = existingVideoRecords.find((eVideo: any) => eVideo.api_id == apiVideo.api_id) ||
+                        insertedVideos.find((iVideo: any) => iVideo.api_id == apiVideo.api_id);
+    
+    
+        return {
+            ...apiVideo,
+            id: dbVideo?.id, // Include the UUID id from the database
+            cover: dbVideo?.cover || apiVideo.cover,
+            api_id: dbVideo?.api_id || apiVideo.id,
+            type: "video",
+        };
+    });
+      console.log("\n\nCV\n\n",combinedVideos);
+
+      return combinedVideos;
     } else {
       return [{ items: false }];
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 }
 
