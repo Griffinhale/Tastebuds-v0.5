@@ -82,19 +82,21 @@ async function handleBookSearch(body: { term: string; page: number }) {
 
     if (data.items) {
       // Prepare books for checking in the database
-      const filteredBook = data.items.filter((book: any) => book.volumeInfo.imageLinks);
-      const booksForCheck = filteredBook
-        .map((book: any) => ({
-          api_id: book.id,
-          title: book.volumeInfo.title,
-          cover: book.volumeInfo.imageLinks.thumbnail,
-          description: book.volumeInfo.description || "",
-          type: "book",
-        }));
+      const filteredBook = data.items.filter(
+        (book: any) => book.volumeInfo.imageLinks
+      );
+      const booksForCheck = filteredBook.map((book: any) => ({
+        api_id: book.id,
+        title: book.volumeInfo.title,
+        cover: book.volumeInfo.imageLinks.thumbnail,
+        description: book.volumeInfo.description || "",
+        type: "book",
+        creator: book.volumeInfo.authors
+      }));
 
       // Collect all api_ids for a batch check
       const apiIds = booksForCheck.map((book: any) => book.api_id);
-        
+
       // Check for existing books in a batch
       const { data: existingBooks, error: existingBooksError } = await supabase
         .from("items")
@@ -129,28 +131,29 @@ async function handleBookSearch(body: { term: string; page: number }) {
           console.error("Error inserting new books: ", insertError);
           return;
         }
-        
+
         insertedBooks = insertedData || [];
       }
 
       // Combine existing and new books, ensuring cover and api_id are included
-  const combinedBooks = filteredBook.map((apiBook: any ) => {
-    // Find the corresponding book record from the database
-    const dbBook = existingBookRecords.find((eBook) => eBook.api_id === apiBook.id) ||
-                   insertedBooks.find((iBook: any ) => iBook.api_id === apiBook.id);
-    console.log(dbBook);
-    // Merge the API book data with the database record
-    return {
-      ...apiBook, // Original data from the Google Books API
-      cover: dbBook?.cover, // Use cover from DB if available
-      api_id: dbBook?.api_id, // Include api_id
-      id: dbBook?.id, // Include the UUID id from the database
-      title: dbBook?.title,
-      type: "book",
-    };
-  });
-  
-  return combinedBooks;
+      const combinedBooks = filteredBook.map((apiBook: any) => {
+        // Find the corresponding book record from the database
+        const dbBook =
+          existingBookRecords.find((eBook) => eBook.api_id === apiBook.id) ||
+          insertedBooks.find((iBook: any) => iBook.api_id === apiBook.id);
+        console.log(dbBook);
+        // Merge the API book data with the database record
+        return {
+          ...apiBook, // Original data from the Google Books API
+          cover: dbBook?.cover, // Use cover from DB if available
+          api_id: dbBook?.api_id, // Include api_id
+          id: dbBook?.id, // Include the UUID id from the database
+          title: dbBook?.title,
+          type: "book",
+        };
+      });
+
+      return combinedBooks;
     } else {
       return [{ items: false }];
     }
@@ -185,11 +188,15 @@ async function handleVideoSearch(body: { term: string; page: number }) {
     const response = await fetch(searchURL, options);
     const data = await response.json();
 
-    if (data.results && data.results.filter((video: any) => video.media_type !== "person")
-    .length > 0) {
+    if (
+      data.results &&
+      data.results.filter((video: any) => video.media_type !== "person")
+        .length > 0
+    ) {
       const filteredResults = data.results.filter(
         (video: any) => video.poster_path
       );
+      console.log(filteredResults);
       const videosForCheck = filteredResults.map((video: any) => ({
         api_id: video.id,
         title: video.title || video.name,
@@ -202,21 +209,22 @@ async function handleVideoSearch(body: { term: string; page: number }) {
       // Collect all api_ids for a batch check
       const apiIds = videosForCheck.map((video: any) => video.api_id);
       // Check for existing videos in a batch
-      const { data: existingVideos, error: existingVideosError } = await supabase
-        .from("items")
-        .select()
-        .eq("api_id", apiIds)
-        
+      const { data: existingVideos, error: existingVideosError } =
+        await supabase.from("items").select().eq("api_id", apiIds);
 
       if (existingVideosError) {
-        console.error("Error checking for existing videos: ", existingVideosError);
+        console.error(
+          "Error checking for existing videos: ",
+          existingVideosError
+        );
         return;
       }
 
       const existingVideoRecords = existingVideos || [];
       // Determine which videos need to be inserted
       const newVideos = videosForCheck.filter(
-        (video: any) => !existingVideoRecords.find((eVideo) => eVideo.api_id === video.api_id)
+        (video: any) =>
+          !existingVideoRecords.find((eVideo) => eVideo.api_id === video.api_id)
       );
 
       // Insert new videos in a batch
@@ -233,24 +241,27 @@ async function handleVideoSearch(body: { term: string; page: number }) {
         }
 
         insertedVideos = insertedData || [];
-    
       }
 
       // Combine existing and new videos
       const combinedVideos = videosForCheck.map((apiVideo: any) => {
-        const dbVideo = existingVideoRecords.find((eVideo: any) => eVideo.api_id == apiVideo.api_id) ||
-                        insertedVideos.find((iVideo: any) => iVideo.api_id == apiVideo.api_id);
-    
-    
+        const dbVideo =
+          existingVideoRecords.find(
+            (eVideo: any) => eVideo.api_id == apiVideo.api_id
+          ) ||
+          insertedVideos.find(
+            (iVideo: any) => iVideo.api_id == apiVideo.api_id
+          );
+
         return {
-            ...apiVideo,
-            id: dbVideo?.id, // Include the UUID id from the database
-            cover: dbVideo?.cover || apiVideo.cover,
-            api_id: dbVideo?.api_id || apiVideo.id,
-            type: "video",
+          ...apiVideo,
+          id: dbVideo?.id, // Include the UUID id from the database
+          cover: dbVideo?.cover || apiVideo.cover,
+          api_id: dbVideo?.api_id || apiVideo.id,
+          type: "video",
         };
-    });
-      console.log("\n\nCV\n\n",combinedVideos);
+      });
+      console.log("\n\nCV\n\n", combinedVideos);
 
       return combinedVideos;
     } else {
@@ -263,44 +274,6 @@ async function handleVideoSearch(body: { term: string; page: number }) {
 
 // Function to handle album search and insert new albums into database
 async function handleAlbumSearch(body: { term: string; page: number }) {
-  // Function to insert an album into the database if it doesn't exist
-  async function insertAlbum(album: { cover: any; title: any; creator: any }) {
-    try {
-      // Check if the album already exists in the database
-      const { data: existingAlbums, error: existingAlbumsError } =
-        await supabase.from("items").select("*").eq("cover", album.cover);
-      if (existingAlbumsError) {
-        console.log("\n\nERROR\n\n", existingAlbumsError);
-        return;
-      }
-
-      // If the album doesn't exist, insert it into the database
-      if (existingAlbums!.length === 0) {
-        const { data: newAlbum, error: newAlbumError } = await supabase
-          .from("items")
-          .insert([
-            {
-              title: album.title,
-              creator: album.creator,
-              cover: album.cover,
-              type: "album",
-            },
-          ])
-          .select();
-
-        if (newAlbumError) {
-          console.log("\n\nERROR\n\n", newAlbumError);
-          return;
-        }
-        return newAlbum[0]!.id;
-      } else {
-        return existingAlbums![0].id;
-      }
-    } catch (err) {
-      console.log("supabase error: " + err);
-    }
-  }
-
   // Construct the URL for LastFM API search
   const lastFmApiKey = process.env.LAST_FM_KEY;
   const searchURL = `http://ws.audioscrobbler.com/2.0/?method=album.search&album=${body.term}&limit=40&page=${body.page}&api_key=${lastFmApiKey}&format=json`;
@@ -318,40 +291,81 @@ async function handleAlbumSearch(body: { term: string; page: number }) {
     // Fetch album data from LastFM API
     const response = await fetch(searchURL);
     const data = await response.json();
+    if (data.results.albummatches.album.length > 0) {
+      //only include the albums with cover images
+      const filteredResults = data.results.albummatches.album.filter(
+        (a: { image: string | any[] }) =>
+          a.image[a.image.length - 1]["#text"] !== ""
+      );
 
-    const results = await Promise.all(
-      data.results.albummatches.album
+      //grab cover links to compare against db
+      const coverLinks = filteredResults.map(
+        (a: any) => a.image[a.image.length - 1]
+      );
+
+      const { data: existingAlbums, error: existingAlbumsError } =
+        await supabase.from("items").select().eq("cover", coverLinks);
+
+      if (existingAlbumsError) {
+        throw new Error("supabase read error: " + existingAlbumsError);
+      }
+
+      //filter results that aren't already in db
+      const newAlbums = filteredResults
         .filter(
-          (album: { image: string | any[] }) =>
-            album.image[album.image.length - 1]["#text"] !== ""
+          (album: any) =>
+            !existingAlbums.includes(
+              (eAlbum: any) =>
+                eAlbum.cover === album.image[album.image.length - 1]
+            )
         )
-        .map(
-          async (album: {
-            cover: any;
-            image: string | any[];
-            title: any;
-            name: any;
-            creator: any;
-            artist: any;
-            type: string;
-            id: any;
-          }) => {
-            // Process and insert each album into the database
-            album.cover = album.image[album.image.length - 1]["#text"];
-            album.title = album.name;
-            album.creator = album.artist;
-            album.type = "album";
-            try {
-              album.id = await insertAlbum(album);
-            } catch (err) {
-              console.log("problem with insert album");
-            }
-            return album;
-          }
-        )
-    );
+        .map((a: any) => ({
+          title: a.name,
+          cover: a.image[a.image.length - 1]["#text"],
+          type: "album",
+          creator: a.artist,
+        }
+          
+          ));
 
-    return results;
+      let insertedAlbums: any;
+      if (newAlbums.length > 0) {
+        const { data: insertedData, error: insertedDataError } = await supabase
+          .from("items")
+          .insert(newAlbums)
+          .select();
+
+        if (insertedDataError) {
+          throw new Error("problem inserting albums" + insertedDataError);
+        }
+        insertedAlbums = insertedData;
+        console.log(insertedAlbums);
+      }
+      //add db properties onto data for client use
+      const combinedAlbums = filteredResults.map((apiAlbum: any) => {
+        const dbVideo =
+          existingAlbums.find(
+            (eAlbum: any) =>
+              eAlbum.cover === apiAlbum.image[apiAlbum.image.length - 1]["#text"]
+          ) ||
+          insertedAlbums.find(
+            (iAlbum: any) =>
+              iAlbum.cover === apiAlbum.image[apiAlbum.image.length - 1]["#text"]
+          );
+
+        return {
+          ...apiAlbum,
+          id: dbVideo.id,
+          cover: dbVideo.cover,
+          type: "album",
+          creator: dbVideo.creator,
+          title: dbVideo.title,
+        };
+      });
+      return combinedAlbums;
+    } else {
+      return [{ items: false }];
+    }
   } catch (error) {
     console.log("error:", error);
   }
