@@ -91,7 +91,7 @@ async function handleBookSearch(body: { term: string; page: number }) {
         cover: book.volumeInfo.imageLinks.thumbnail,
         description: book.volumeInfo.description || "",
         type: "book",
-        creator: book.volumeInfo.authors
+        creator: book.volumeInfo.authors,
       }));
 
       // Collect all api_ids for a batch check
@@ -324,9 +324,7 @@ async function handleAlbumSearch(body: { term: string; page: number }) {
           cover: a.image[a.image.length - 1]["#text"],
           type: "album",
           creator: a.artist,
-        }
-          
-          ));
+        }));
 
       let insertedAlbums: any;
       if (newAlbums.length > 0) {
@@ -346,11 +344,13 @@ async function handleAlbumSearch(body: { term: string; page: number }) {
         const dbVideo =
           existingAlbums.find(
             (eAlbum: any) =>
-              eAlbum.cover === apiAlbum.image[apiAlbum.image.length - 1]["#text"]
+              eAlbum.cover ===
+              apiAlbum.image[apiAlbum.image.length - 1]["#text"]
           ) ||
           insertedAlbums.find(
             (iAlbum: any) =>
-              iAlbum.cover === apiAlbum.image[apiAlbum.image.length - 1]["#text"]
+              iAlbum.cover ===
+              apiAlbum.image[apiAlbum.image.length - 1]["#text"]
           );
 
         return {
@@ -373,75 +373,34 @@ async function handleAlbumSearch(body: { term: string; page: number }) {
 
 // Function to handle game search and insert new games into the database
 async function handleGameSearch(body: { term: string; page: number }) {
-  // Function to insert a game into the database if it doesn't exist
-  async function insertGame(game: {
-    api_id: any;
-    cover: any;
-    title: any;
-    description: any;
-  }) {
-    // Check if the game already exists in the database
-    const { data: existingGames, error: existingGamesError } = await supabase
-      .from("items")
-      .select("*")
-      .eq("api_id", game.api_id);
-
-    if (existingGamesError) {
-      console.log("existing games error: ", existingGamesError);
-      return;
-    }
-
-    // If the game doesn't exist, insert it into the database
-    if (existingGames.length === 0) {
-      const { data: newGame, error: newGameError } = await supabase
-        .from("items")
-        .insert([
-          {
-            api_id: game.api_id,
-            cover: game.cover,
-            title: game.title,
-            description: game.description,
-            type: "game",
-          },
-        ])
-        .select();
-
-      if (newGameError) {
-        console.log("new game error: ", newGameError);
-        return;
-      }
-      return newGame[0].id;
-    } else {
-      return existingGames[0].id;
-    }
-  }
 
   // Fetch Twitch bearer token if not already retrieved
   if (igdbTwitchBearer === "") {
     igdbTwitchBearer = await getTwitchKeys();
     console.log("Twitch bearer: ", igdbTwitchBearer);
   }
-
+  
   // Construct the body data and URL for IGDB API search
+  const resultsOffset = body.page * 50 - 50;
+  const bodyData = `search "${body.term}"; fields cover.*, *, platforms.*, keywords.*, genres.*;limit 50; offset ${resultsOffset};`;
+  const url = "https://api.igdb.com/v4/games";
   const igdbIdKey = process.env.IGDB_ID_KEY;
+  if (!igdbIdKey) {
+        throw new Error("no igdb api key");
+      }
+  console.log(
+    "IGDB API call\npage: " +
+      body.page +
+      "\nterm: " +
+      body.term +
+      "\nURL: " +
+      url +
+      "\nbody: " +
+      bodyData
+  );
+  
+  
   try {
-    const resultsOffset = body.page * 50 - 50;
-    const bodyData = `search "${body.term}"; fields cover.*, *, platforms.*, keywords.*, genres.*;limit 50; offset ${resultsOffset};`;
-    const url = "https://api.igdb.com/v4/games";
-
-    console.log(
-      "IGDB API call\npage: " +
-        body.page +
-        "\nterm: " +
-        body.term +
-        "\nURL: " +
-        url +
-        "\nbody: " +
-        bodyData
-    );
-    if (!igdbIdKey) {
-      throw new Error("no igdb api key");
-    }
     // Fetch game data from IGDB API
     const response = await fetch(url, {
       method: "POST",
@@ -452,31 +411,61 @@ async function handleGameSearch(body: { term: string; page: number }) {
       },
       body: bodyData,
     });
-
     const data = await response.json();
+    const filteredData = data.filter((game: { cover: undefined }) => game.cover !== undefined)
+                              .map((game: any) => ({
+                                title: game.name,
+                                cover: game.cover.url.replace("t_thumb", "t_cover_big"), // get bigger thumbnail
+                                api_id: game.id,
+                                type: "game",
+                                description: game.summary || "",
+                              }))
 
-    let results;
-    if (
-      data.filter((game: { cover: undefined }) => game.cover !== undefined)
-        .length > 0
-    ) {
-      let resultsPromises = data
-        .filter((game: { cover: undefined }) => game.cover !== undefined)
-        .map(async (game: any) => {
-          // Process and insert each game into the database
-          game.title = game.name;
-          game.cover = game.cover.url.replace("t_thumb", "t_cover_big");
-          game.api_id = game.id;
-          game.id = await insertGame(game);
-          game.type = "game";
-          game.description = game.summary;
-          return game;
-        });
-      results = await Promise.all(resultsPromises);
+    if (filteredData.length > 0) {
+      // collect api ids for comparison with db
+      const apiIds = filteredData.map((game: any) => ({
+        api_id: game.api_id
+      }));
+
+      const {data: existingGames, error: existingGamesError} = await supabase
+      .from("items")
+      .select()
+      .eq("api_id", apiIds);
+
+      if (existingGamesError) {
+        throw existingGamesError
+      }
+
+      // filter out existing games, determine which need to be inserted
+      const newGames = filteredData.filter((game: any) => !existingGames.find((eGame: any) => game.id === eGame.api_id));
+      
+      let insertedGames: any[];
+
+      if (newGames.length > 0) {
+        const {data: insertedData, error: insertedDataError} = await supabase
+        .from("items")
+        .insert(newGames)
+        .select();
+
+        if (insertedDataError) {
+          throw insertedDataError;
+        }
+        insertedGames = insertedData;
+      }
+      // add db id before returning data
+      const combinedGames = filteredData.map((apiGame: any) => {
+          const dbGame = existingGames.find((eGame: any) => eGame.api_id == apiGame.api_id) ||
+                          insertedGames.find((iGame: any) => iGame.api_id == apiGame.api_id);
+          console.log(dbGame);
+          return {
+            ...apiGame,
+            id: dbGame.id,
+          }
+      })
+      return combinedGames;
     } else {
-      results = [{ items: false }];
-    }
-    return results;
+      return [{items: false}];
+    } 
   } catch (error) {
     console.log(error);
   }
