@@ -1,17 +1,18 @@
 {
-    "cSpell.words": [
-        "albummatches",
-        "bungus",
-        "dompurify",
-        "Endof",
-        "getinfo",
-        "IGDB",
-        "isloading",
-        "quartiary",
-        "randomizer",
-        "signup",
-        "tailwindcss",
-        "TMDB",
-        "usestateref"
-    ]
+  "cSpell.words": [
+    "albummatches",
+    "bungus",
+    "dompurify",
+    "Endof",
+    "getinfo",
+    "IGDB",
+    "isloading",
+    "quartiary",
+    "randomizer",
+    "signup",
+    "tailwindcss",
+    "TMDB",
+    "usestateref"
+  ],
+  "files.associations": { "*.css": "tailwindcss" }
 }
