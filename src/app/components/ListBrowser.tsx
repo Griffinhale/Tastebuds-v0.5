@@ -24,10 +24,13 @@ const ListBrowser = () => {
   //fetch lists
   useEffect(() => {
     async function fetchLists(params: {filter: string, userId: string, lastList: number, fetchAmount: number}){
-      const data = await fetch("/lists/routes", {method: "POST",headers: {
+      const data = await fetch("/lists/routes?all=true&filter=" + params.filter, {method: "GET",headers: {
         "Content-Type": "application/json",
-      }, body: JSON.stringify(params)})
+      }})
+      const results = await data.json()
+      console.log(results);
     };
+      console.log("filter changed")
     const body = {
       filter: filterRef.current,
       userId: userIdRef.current,
@@ -36,10 +39,12 @@ const ListBrowser = () => {
     };
     fetchLists(body);
     //eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterRef]);
+  }, [filterRef.current]);
 
 
-  return <div>ListBrowser</div>;
+  return <div>ListBrowser
+    <div><button onClick={() => setFilter("default")}>default</button>   <button onClick={() => setFilter("popular")}>popular</button></div>
+  </div>;
 };
 
 export default ListBrowser;
