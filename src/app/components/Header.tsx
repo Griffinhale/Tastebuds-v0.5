@@ -44,7 +44,7 @@ const Header = () => {
           {/* Display the user's screen name if logged in, otherwise show a link to sign up/login */}
           {userIdRef.current !== ""?(<><p className="pr-4">{screenNameRef.current}</p> <Link onClick={logOut} href="/">Sign Out</Link></>):<Link href="/login">Sign Up/Login</Link>}
         </div>
-        <div className="w-1/5 text-4xl font-bold pl-6 pt-10 pr-6">
+        <div className="w-1/5 text-4xl font-bold pt-10">
           <h1>TasteBuds</h1> {/* Static title for the header */}
         </div>
       </div>

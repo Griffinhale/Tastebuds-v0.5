@@ -9,6 +9,8 @@ import supabase from "../utils/supabaseClient"; // Importing Supabase client
 import { BiCheckCircle, BiErrorCircle, BiPlusCircle } from "react-icons/bi";
 import toast from "react-hot-toast";
 import extractDataFromCookie from "../utils/extractCookie";
+import DetailsCoverCard from "./DetailsCoverCard";
+
 
 interface Params {
   params: [string, string];
@@ -24,8 +26,6 @@ const AlbumDetails: React.FC<Params> = ({ params }) => {
   const [results, setResults, resultsRef] = useState<any>([]); // Stores fetched data, its setter, and a ref
   const [isLoading, setIsLoading, isLoadingRef] = useState(true); // Manages loading state
   const [cover, setCover] = useState(""); // Stores album cover URL
-  const [alreadyInLib, setAlreadyInLib, alreadyInLibRef] = useState(false); // State to check if book is already in library
-  const [addedToLib, setAddedToLib, addedToLibRef] = useState(false); // State to check if book was added to library
   const [userId, setUserId, userIdRef] = useState(""); // State for storing user ID
 
   // A function to handle album type selection logic (currently empty)
@@ -34,49 +34,6 @@ const AlbumDetails: React.FC<Params> = ({ params }) => {
     console.log(resultsRef.current[0].album);
     console.log(typeof resultsRef.current[0].album === "object");
   }*/
-  const addToLibrary = async () => {
-    // Fire toast notification if no user logged in
-    if (userId === "") {
-      toast.error("Log in to add to Library");
-      console.log("no user");
-      return; // This will exit the addToLibrary function
-    }
-
-    // Querying supabase to check if the book is already in the user's library
-    const { data: existingItem, error: existingItemError } = await supabase
-      .from("library")
-      .select("*")
-      .eq("user_id", userIdRef.current);
-    let isInUserLibrary = false;
-    // Check if the book is already in the library
-    if (existingItem) {
-      const filtered = existingItem.filter(
-        (item) => item.item_id === params[1]
-      );
-      if (filtered.length > 0) {
-        isInUserLibrary = true;
-        setAddedToLib(true);
-        setAlreadyInLib(true);
-        console.log("already in library");
-        toast.error("Already in Library!");
-      }
-    } else if (existingItemError) {
-      console.log(existingItemError);
-    }
-    // Add book to the library if it's not already there
-    if (!isInUserLibrary) {
-      setAddedToLib(true);
-      const { error } = await supabase.from("library").insert({
-        item_id: params[1],
-        user_id: userId,
-      });
-      if (error) {
-        console.log(error);
-      } else {
-        toast.success("Added to Library!");
-      }
-    }
-  };
 
   // Extract user data from cookies
   useEffect(() => { 
@@ -122,9 +79,12 @@ const AlbumDetails: React.FC<Params> = ({ params }) => {
         toast.error("No details found, try again");
         return;
       } else {
-      setResults(data);
-      setIsLoading(false);
-      return data;
+        data.creator = albumDetails![0].creator;
+        data.title = albumDetails![0].title;
+        data.cover = albumDetails![0].cover;
+        setResults(data);
+        setIsLoading(false);
+        return data;
       } 
     }
     const details = getAlbumDetails(params[1]);
@@ -135,42 +95,22 @@ const AlbumDetails: React.FC<Params> = ({ params }) => {
   return (
     <div className="flex flex-col h-4/5 min-h-[1200px] w-full rounded-xl text-primary">
       {/* Main Content */}
-      <div className="bg-quartiary/80 border-t-8 border-primary px-8 py-8 mt-1 rounded-xl text-black">
+      <div className="bg-quartiary/80 border-t-8 border-black border-rounded px-8 py-8 mt-1 rounded-xl text-black">
         {/* Conditional rendering based on loading state */}
         {isLoadingRef.current ? (
-          <div className="border-primary border-2 text-black">loading</div>
+          <div className="border-black border-rounded text-black">loading</div>
         ) : (
           // Render the album details if not loading
-          <div className="p-16 space-x-2 flex xl:flex-row flex-col justify-between border-primary border-2 text-black">
+          <div className="p-16 space-x-2 flex xl:flex-row flex-col justify-between border-black rounded text-black">
             {/* Album info section */}
-            <div className="border-primary flex flex-col items-center lg:justify-start justify-between border-2 p-4">
-              <h1 className="text-3xl mb-16 font-bold">
-                Artist: {resultsRef.current[0].album.artist},<br />
-                Title: {resultsRef.current[0].album.name}
-              </h1>
-              <img src={cover} alt="cover" />
-              <button
-                  onClick={addToLibrary}
-                  className="enabled:hover:ring-4 justify-center items-center flex bg-primary w-8 h-8 rounded-xl disabled:opacity-60"
-                  disabled={addedToLibRef.current === true ? true : false}
-                >
-                  {addedToLibRef.current === true ? (
-                    alreadyInLibRef.current === true ? (
-                      <BiErrorCircle />
-                    ) : (
-                      <BiCheckCircle />
-                    )
-                  ) : (
-                    <BiPlusCircle />
-                  )}
-                </button>
-            </div>
-            <div className="border-primary w-4/5 border-2 p-4">
+            <DetailsCoverCard userId={userIdRef.current} item={resultsRef.current} />
+
+            <div className="border-black rounded w-4/5 p-4">
               {/* Album wiki and track listing */}
-              <div className="border-primary border-2 p-4">
+              <div className="border-black rounded p-4">
                 {results.wiki ? results.wiki.content : ""}
               </div>
-              <div className="border-primary border-2 p-4">
+              <div className="border-black rounded p-4">
                 <ol>
                   <h2 className="text-xl font-semibold mb-8">Track listing</h2>
                   {/* Dynamic rendering of track list based on the album type */}
