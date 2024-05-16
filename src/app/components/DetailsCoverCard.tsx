@@ -5,20 +5,21 @@ import useState from "react-usestateref"; // Import custom useState hook that pr
 import { BiCheckCircle, BiErrorCircle, BiPlusCircle } from "react-icons/bi"; // Import icons from react-icons library
 import Image from 'next/image';
 
-interface itemDetails {
-    id: string;
-    cover: string;
-    title: string;
-    creator: string;
-    [key: string]: any;
-}
-
 interface DetailsCardProps {
-    item: itemDetails;
+    id: string;
+    title: string;
+    cover: string;
+    creator: string;
     userId: string;
+    subtitle?: string;
 }
 
-const DetailsCoverCard: React.FC<DetailsCardProps> = ({item, userId}) => {
+const DetailsCoverCard: React.FC<DetailsCardProps> = ({id, title, cover, creator, userId, subtitle = ""}) => {
+  console.log("userId:", userId); // Make sure this isn't an object unless expected
+  console.log("id:", id); // Make sure this isn't an object unless expected
+  console.log("title:", title); // Make sure this isn't an object unless expected
+  console.log("cover:", cover); // Make sure this isn't an object unless expected
+  console.log("creator:", creator); // Make sure this isn't an object unless expected
     const [alreadyInLib, setAlreadyInLib, alreadyInLibRef] = useState(false); // State to check if book is already in library
     const [addedToLib, setAddedToLib, addedToLibRef] = useState(false); // State to check if book was added to library
     const addToLibrary = async () => {
@@ -38,7 +39,7 @@ const DetailsCoverCard: React.FC<DetailsCardProps> = ({item, userId}) => {
         // Check if the book is already in the library
         if (existingItem) {
           const filtered = existingItem.filter(
-            (libItem) => libItem.item_id === item.id
+            (libItem) => libItem.item_id === id
           );
           if (filtered.length > 0) {
             isInUserLibrary = true;
@@ -54,7 +55,7 @@ const DetailsCoverCard: React.FC<DetailsCardProps> = ({item, userId}) => {
         if (!isInUserLibrary) {
           setAddedToLib(true);
           const { error } = await supabase.from("library").insert({
-            item_id: item.id,
+            item_id: id,
             user_id: userId,
           });
           if (error) {
@@ -67,27 +68,28 @@ const DetailsCoverCard: React.FC<DetailsCardProps> = ({item, userId}) => {
     
     useEffect(() => {
         console.log("CoverCard Loaded");
-        console.log(item);
+        console.log(title);
+        console.log(cover, creator);
     })
   
     return (
-    <div className="bg-quartiary/90 rounded-xl flex flex-col lg:flex-row items-center lg:justify-start justify-between p-4">
-              <div className="flex-col w-3/5">
+    <div className="bg-quartiary/90 rounded-xl flex flex-col lg:flex-row items-center lg:justify-start justify-between mt-6 mb-6 p-4 2xl:mt-96 2xl:mb-96 mr-6">
+              <div className="flex-col w-3/5 ml-6 mr-6">
                 <h1 className="text-3xl font-bold">
-                    {item.title}
+                    {title}
                 </h1>
                 <h2 className="text-xl">
-                    {item.subtitle?item.subtitle+", ":""} by{" "}
-                    {item.creator}
+                    {subtitle} by{" "}
+                    {creator}
                 </h2>
               </div>
-              <div className="flex flex-col items-center bg-secondary/20 rounded-2xl">
-                <a href={item.previewLink}>
+              <div className="flex flex-col mr-8 h-500 w-500 mt-6 mb-6 items-center bg-secondary/20 rounded-2xl">
+                <a href={""}>
                     <Image
-                    src={item.cover}
+                    src={cover}
                     alt="cover"
-                    width={300}
-                    height={300}
+                    width={400}
+                    height={400}
                     className = "p-8"
                     />
                 </a>
@@ -111,4 +113,4 @@ const DetailsCoverCard: React.FC<DetailsCardProps> = ({item, userId}) => {
   )
 }
 
-export default DetailsCoverCard
+export default DetailsCoverCard;

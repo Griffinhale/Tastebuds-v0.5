@@ -140,9 +140,9 @@ const BookDetails: React.FC<Params> = ({ params }) => {
         {isLoadingRef.current ? (
           <div className="border-primary border-2 text-black">loading</div>
         ) : (
-          <div className="p-16 space-x-2 flex xl:flex-row flex-col justify-between text-black">
+          <div className="p-16 space-x-2 flex 2xl:flex-row flex-col justify-between text-black">
             <div className="flex-row content-center w-90">
-              <DetailsCoverCard item={resultsRef.current} userId={userIdRef.current}/>
+              <DetailsCoverCard userId={userIdRef.current} id={resultsRef.current.id} title={resultsRef.current.title} cover={resultsRef.current.cover} creator={resultsRef.current.creator}/>
               
               {/*description*/}
               <div className="p-24">

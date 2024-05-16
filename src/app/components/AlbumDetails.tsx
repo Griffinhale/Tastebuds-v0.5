@@ -25,7 +25,7 @@ const AlbumDetails: React.FC<Params> = ({ params }) => {
   // State management for various purposes
   const [results, setResults, resultsRef] = useState<any>([]); // Stores fetched data, its setter, and a ref
   const [isLoading, setIsLoading, isLoadingRef] = useState(true); // Manages loading state
-  const [cover, setCover] = useState(""); // Stores album cover URL
+  const [cover, setCover, coverRef] = useState(""); // Stores album cover URL
   const [userId, setUserId, userIdRef] = useState(""); // State for storing user ID
 
   // A function to handle album type selection logic (currently empty)
@@ -81,7 +81,7 @@ const AlbumDetails: React.FC<Params> = ({ params }) => {
       } else {
         data.creator = albumDetails![0].creator;
         data.title = albumDetails![0].title;
-        data.cover = albumDetails![0].cover;
+        data.cover = coverRef.current;
         setResults(data);
         setIsLoading(false);
         return data;
@@ -95,15 +95,15 @@ const AlbumDetails: React.FC<Params> = ({ params }) => {
   return (
     <div className="flex flex-col h-4/5 min-h-[1200px] w-full rounded-xl text-primary">
       {/* Main Content */}
-      <div className="bg-quartiary/80 border-t-8 border-black border-rounded px-8 py-8 mt-1 rounded-xl text-black">
+      <div className="bg-quartiary/80 border-t-8 border-primary border-rounded px-8 py-8 mt-1 rounded-xl text-black">
         {/* Conditional rendering based on loading state */}
         {isLoadingRef.current ? (
           <div className="border-black border-rounded text-black">loading</div>
         ) : (
           // Render the album details if not loading
-          <div className="p-16 space-x-2 flex xl:flex-row flex-col justify-between border-black rounded text-black">
+          <div className="p-16 space-x-2 flex 2xl:flex-row flex-col justify-between border-black rounded text-black">
             {/* Album info section */}
-            <DetailsCoverCard userId={userIdRef.current} item={resultsRef.current} />
+            <DetailsCoverCard userId={userIdRef.current} id={resultsRef.current.id} title={resultsRef.current.title} cover={resultsRef.current.cover} creator={resultsRef.current.creator} />
 
             <div className="border-black rounded w-4/5 p-4">
               {/* Album wiki and track listing */}

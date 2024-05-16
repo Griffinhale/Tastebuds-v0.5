@@ -2,7 +2,7 @@
 const nextConfig = {
     reactStrictMode: false,
     images: {
-        domains: ['books.google.com', 'lastfm.freetls.fastly.net'],
+        domains: ['books.google.com', 'lastfm.freetls.fastly.net', 'images.igdb.com', 'image.tmdb.org'],
       },
 }
 

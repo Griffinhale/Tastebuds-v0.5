@@ -1,11 +1,18 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { JSXElementConstructor, Key, PromiseLikeOfReactNode, ReactElement, ReactNode, ReactPortal, useEffect } from "react";
+import {
+  JSXElementConstructor,
+  Key,
+  PromiseLikeOfReactNode,
+  ReactElement,
+  ReactNode,
+  ReactPortal,
+  useEffect,
+} from "react";
 import useState from "react-usestateref";
-import { BiCheckCircle, BiErrorCircle, BiPlusCircle } from "react-icons/bi";
 import supabase from "../utils/supabaseClient";
 import extractDataFromCookie from "../utils/extractCookie";
-import toast from "react-hot-toast"
+import DetailsCoverCard from "./DetailsCoverCard";
 
 interface Params {
   params: [string, string];
@@ -16,58 +23,9 @@ const VideoDetails: React.FC<Params> = ({ params }) => {
   // State management for video details, loading status, library status, etc.
   const [results, setResults, resultsRef] = useState<any>([]);
   const [isLoading, setIsLoading, isLoadingRef] = useState(true);
-  const [alreadyInLib, setAlreadyInLib, alreadyInLibRef] = useState(false);
-  const [addedToLib, setAddedToLib, addedToLibRef] = useState(false);
   const [cover, setCover] = useState("");
   const [userId, setUserId, userIdRef] = useState("");
 
-  // Function to add a video to the user's library
-  const addToLibrary = async () => {
-    // Fire toast notification if no user logged in
-    if (userId === "") {
-      toast.error("Log in to add to Library");
-      console.log("no user");
-      return; // This will exit the addToLibrary function
-    }
-    // Check if the video is already in the user's library
-    const { data: existingItem, error: existingItemError } = await supabase
-      .from("library")
-      .select("*")
-      .eq("user_id", userIdRef.current);
-
-    let isInUserLibrary = false;
-    if (existingItem) {
-      // Filter to check if the video is already in the library
-      const filtered = existingItem.filter(
-        (item) => item.item_id === params[1]
-      );
-      if (filtered.length > 0) {
-        isInUserLibrary = true;
-        setAddedToLib(true);
-        setAlreadyInLib(true);
-        toast.error("Already in Library!");
-      }
-    } else if (existingItemError) {
-      console.log(existingItemError);
-    }
-
-    // If the video is not in the library, add it
-    if (isInUserLibrary === false) {
-      console.log("adding to library");
-      console.log(params[1]);
-      setAddedToLib(true);
-      // Insert the video into the user's library
-      const { error } = await supabase.from("library").insert({
-        item_id: params[1],
-        user_id: userId,
-      });
-      if (error) {
-        console.log(error);
-      } else {
-        toast.success("Added to Library!");
-      }
-    }
-  };
   // Extract user data from cookie
   useEffect(() => {
     const data = extractDataFromCookie();
@@ -77,8 +35,8 @@ const VideoDetails: React.FC<Params> = ({ params }) => {
       console.log("auth_data not found in cookie");
       setUserId("");
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Fetch video details on component mount
   useEffect(() => {
@@ -111,6 +69,13 @@ const VideoDetails: React.FC<Params> = ({ params }) => {
       );
       let data = await response.json();
       data.video_type = videoDetails![0].video_type;
+      if (data.credits && !data.creator) {
+        data.creator = data.credits.crew.l
+          ? data.credits.crew[0].name
+          : "Unknown";
+      } else {
+        data.creator = "Unknown";
+      }
       setResults(data); // Set the results state
       setIsLoading(false); // Set loading to false
     }
@@ -125,52 +90,62 @@ const VideoDetails: React.FC<Params> = ({ params }) => {
         <div className="bg-quartiary/80 border-t-8 border-primary px-8 py-8 mt-1 rounded-xl text-black">
           {/*Info*/}
           {isLoadingRef.current ? (
-            <div className="border-primary border-2 text-black">loading</div>
+            <div className="text-black">loading</div>
           ) : (
-            <div className="p-16 space-x-2 flex xl:flex-row flex-col justify-between border-primary border-2 text-black">
-              <div className="border-primary flex flex-col items-center lg:justify-start justify-between border-2 p-4">
-                <h1 className="text-3xl font-bold">
-                  {resultsRef.current.name}
-                </h1>
-                <h2 className="mb-8">{resultsRef.current.tagline}</h2>
-
-                <a href={resultsRef.current.homepage}>
-                  <img src={cover} alt="cover" />
-                </a>
-                <button
-                  onClick={addToLibrary}
-                  className="enabled:hover:ring-4 justify-center items-center flex bg-primary w-8 h-8 rounded-xl disabled:opacity-60"
-                  disabled={addedToLibRef.current === true ? true : false}
-                >
-                  {addedToLibRef.current === true ? (
-                    alreadyInLibRef.current === true ? (
-                      <BiErrorCircle />
-                    ) : (
-                      <BiCheckCircle />
-                    )
-                  ) : (
-                    <BiPlusCircle />
-                  )}
-                </button>
-              </div>
-              <div className="border-primary w-4/5 border-2 p-4">
+            <div className="p-16 space-x-2 flex 2xl:flex-row flex-col justify-between border-primary text-black">
+              <DetailsCoverCard
+                userId={userIdRef.current}
+                id={resultsRef.current.id}
+                title={resultsRef.current.title}
+                cover={cover}
+                creator={resultsRef.current.creator}
+              />
+              <div className="w-4/5 p-4">
                 <p className="whitespace-pre-line">
                   {resultsRef.current.overview}
                 </p>
               </div>
-              <div className="border-primary flex-col flex justify-between w-4/5 border-2 p-4">
+              <div className="flex-col flex justify-between w-4/5 p-4">
                 <div>
-                  <p>Number of seasons: {resultsRef.current.number_of_seasons}</p>
-                  <p>Number of Episodes: {resultsRef.current.number_of_episodes}</p>
+                  <p>
+                    Number of seasons: {resultsRef.current.number_of_seasons}
+                  </p>
+                  <p>
+                    Number of Episodes: {resultsRef.current.number_of_episodes}
+                  </p>
                   <p>First Air Date: {resultsRef.current.first_air_date}</p>
-                  <p>Created by: {resultsRef.current.created_by.length !== 0?resultsRef.current.created_by[0].name:null}</p>
+                  <p>
+                    Created by:{" "}
+                    {resultsRef.current.created_by.length !== 0
+                      ? resultsRef.current.created_by[0].name
+                      : null}
+                  </p>
                 </div>
                 <div>
                   <h2>Genres:</h2>
                   {resultsRef.current.genres ? (
-                    resultsRef.current.genres.map((genre: { name: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | PromiseLikeOfReactNode | null | undefined; }, index: Key | null | undefined) => {
-                      return <p key={index}>{genre.name}</p>;
-                    })
+                    resultsRef.current.genres.map(
+                      (
+                        genre: {
+                          name:
+                            | string
+                            | number
+                            | boolean
+                            | ReactElement<
+                                any,
+                                string | JSXElementConstructor<any>
+                              >
+                            | Iterable<ReactNode>
+                            | ReactPortal
+                            | PromiseLikeOfReactNode
+                            | null
+                            | undefined;
+                        },
+                        index: Key | null | undefined
+                      ) => {
+                        return <p key={index}>{genre.name}</p>;
+                      }
+                    )
                   ) : (
                     <p>None Available</p>
                   )}
@@ -186,43 +161,25 @@ const VideoDetails: React.FC<Params> = ({ params }) => {
     return (
       <div className="flex flex-col h-4/5 min-h-[1200px] w-full rounded-xl text-primary">
         {/*Main Content*/}
-        <div className="bg-quartiary/80 border-t-8 border-primary px-8 py-8 mt-1 rounded-xl text-black">
+        <div className="bg-quartiary/80 border-primary border-t-8 px-8 py-8 mt-1 rounded-xl text-black">
           {/*Info*/}
           {isLoadingRef.current ? (
-            <div className="border-primary border-2 text-black">loading</div>
+            <div className="text-black">loading</div>
           ) : (
-            <div className="p-16 space-x-2 flex xl:flex-row flex-col justify-between border-primary border-2 text-black">
-              <div className="border-primary flex flex-col items-center lg:justify-start justify-between border-2 p-4">
-                <h1 className="text-3xl font-bold">
-                  {resultsRef.current.title}
-                </h1>
-                <h2 className="mb-8">{resultsRef.current.tagline}</h2>
-
-                <a href={resultsRef.current.homepage}>
-                  <img src={cover} alt="cover" />
-                </a>
-                <button
-                  onClick={addToLibrary}
-                  className="enabled:hover:ring-4 justify-center items-center flex bg-primary w-8 h-8 rounded-xl disabled:opacity-60"
-                  disabled={addedToLibRef.current === true ? true : false}
-                >
-                  {addedToLibRef.current === true ? (
-                    alreadyInLibRef.current === true ? (
-                      <BiErrorCircle />
-                    ) : (
-                      <BiCheckCircle />
-                    )
-                  ) : (
-                    <BiPlusCircle />
-                  )}
-                </button>
-              </div>
-              <div className="border-primary w-4/5 border-2 p-4">
+            <div className="p-16 space-x-2 flex 2xl:flex-row flex-col justify-between text-black">
+              <DetailsCoverCard
+                userId={userIdRef.current}
+                id={resultsRef.current.id}
+                title={resultsRef.current.title}
+                cover={cover}
+                creator={resultsRef.current.creator}
+              />
+              <div className=" w-4/5 p-4">
                 <p className="whitespace-pre-line">
                   {resultsRef.current.overview}
                 </p>
               </div>
-              <div className="border-primary flex-col flex justify-between w-4/5 border-2 p-4">
+              <div className="flex-col flex justify-between w-4/5 p-4">
                 <div>
                   <p>Budget: {resultsRef.current.budget}</p>
                   <p>Revenue: {resultsRef.current.revenue}</p>
@@ -232,9 +189,11 @@ const VideoDetails: React.FC<Params> = ({ params }) => {
                 <div>
                   <h2>Genres:</h2>
                   {resultsRef.current.genres ? (
-                    resultsRef.current.genres.map((genre:any, index:number) => {
-                      return <p key={index}>{genre.name}</p>;
-                    })
+                    resultsRef.current.genres.map(
+                      (genre: any, index: number) => {
+                        return <p key={index}>{genre.name}</p>;
+                      }
+                    )
                   ) : (
                     <p>None Available</p>
                   )}
@@ -245,8 +204,8 @@ const VideoDetails: React.FC<Params> = ({ params }) => {
         </div>
       </div>
     );
-  } 
-  return <div>?</div>
+  }
+  return <div>?</div>;
 };
 
 export default VideoDetails;

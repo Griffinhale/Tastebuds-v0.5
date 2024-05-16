@@ -1,11 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { JSXElementConstructor, Key, PromiseLikeOfReactNode, ReactElement, ReactNode, ReactPortal, useEffect } from "react";
+import {JSXElementConstructor,Key,PromiseLikeOfReactNode,ReactElement,ReactNode,ReactPortal,useEffect} from "react";
 import useState from "react-usestateref";
-import { BiCheckCircle, BiErrorCircle, BiPlusCircle } from "react-icons/bi";
 import supabase from "../utils/supabaseClient";
 import extractDataFromCookie from "../utils/extractCookie";
-import toast from "react-hot-toast";
+import DetailsCoverCard from "./DetailsCoverCard";
 
 interface Params {
   params: [string, string];
@@ -16,61 +15,8 @@ const GameDetails: React.FC<Params> = ({ params }) => {
   // useStateRef is used to create state variables along with references to them
   const [results, setResults, resultsRef] = useState<any>([]);
   const [isLoading, setIsLoading, isLoadingRef] = useState(true);
-  const [alreadyInLib, setAlreadyInLib, alreadyInLibRef] = useState(false);
-  const [addedToLib, setAddedToLib, addedToLibRef] = useState(false);
-  const [cover, setCover] = useState("");
+  const [cover, setCover, coverRef] = useState("");
   const [userId, setUserId, userIdRef] = useState("");
-
-  // Function to add a game to the user's library
-  const addToLibrary = async () => {
-    // Fire toast notification if no user logged in
-    if (userId === "") {
-      toast.error("Log in to add to Library");
-      return; // This will exit the addToLibrary function
-    }
-
-    // Check if the item is already in the user's library
-    const { data: existingItem, error: existingItemError } = await supabase
-      .from("library")
-      .select("*")
-      .eq("user_id", userIdRef.current);
-
-    let isInUserLibrary = false;
-
-    // If the item exists, check if it matches the current game
-    if (existingItem) {
-      const filtered = existingItem.filter(
-        (item) => item.item_id === params[1]
-      );
-
-      // If the game is found, update state to reflect its presence
-      if (filtered.length > 0) {
-        isInUserLibrary = true;
-        setAddedToLib(true);
-        setAlreadyInLib(true);
-        toast.error("Already in Library!");
-      }
-    } else if (existingItemError) {
-      console.log(existingItemError);
-    }
-
-    // If the game is not in the library, add it
-    if (isInUserLibrary === false) {
-      setAddedToLib(true);
-
-      // Insert the game into the library in the database
-      const { error } = await supabase.from("library").insert({
-        item_id: params[1],
-        user_id: userId,
-      });
-
-      if (error) {
-        console.log(error);
-      } else {
-        toast.success("Added to Library!");
-      }
-    }
-  };
 
   // Extract user data from cookie
   useEffect(() => {
@@ -82,7 +28,7 @@ const GameDetails: React.FC<Params> = ({ params }) => {
       setUserId("");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 
   // Fetch further game details on component mount
   useEffect(() => {
@@ -93,7 +39,7 @@ const GameDetails: React.FC<Params> = ({ params }) => {
         .select("*")
         .eq("id", item_id);
 
-      setCover(gameDetails![0].cover); 
+      setCover(gameDetails![0].cover);
 
       // Prepare data for fetching additional details
       const bodyData = { type: params[0], api_id: gameDetails![0].api_id };
@@ -112,7 +58,19 @@ const GameDetails: React.FC<Params> = ({ params }) => {
       const data = await response.json();
 
       // Set the results and update loading state
+      data[0].cover = "http:" + coverRef.current;
+      console.log(data[0].cover)
+      data[0].title = data[0].name;
+      data[0].api_id = data[0].id;
+      data[0].id = params[1];
+      if (data[0].companyData.length == 0) {
+        data[0].creator = "Unknown";
+      } else {
+        data[0].creator = data[0].companyData[0].name;
+      }
+
       setResults(data[0]);
+      console.log(userIdRef.current, resultsRef.current);
       setIsLoading(false);
       return data;
     }
@@ -128,44 +86,42 @@ const GameDetails: React.FC<Params> = ({ params }) => {
       <div className="bg-quartiary/80 border-t-8 border-primary px-8 py-8 mt-1 rounded-xl text-black">
         {/*Info*/}
         {isLoadingRef.current ? (
-          <div className="border-primary border-2 text-black">loading</div>
+          <div className="text-black">loading</div>
         ) : (
-          <div className="p-16 space-x-2 flex xl:flex-row flex-col justify-between border-primary border-2 text-black">
-            <div className="border-primary flex flex-col items-center lg:justify-start justify-between border-2 p-4">
-              <h1 className="text-3xl font-bold">{resultsRef.current.name}</h1>
-
-              <a href={resultsRef.current.url}>
-                <img src={resultsRef.current.cover.url} alt="cover" />
-              </a>
-              <button
-                onClick={addToLibrary}
-                className="enabled:hover:ring-4 justify-center items-center flex bg-primary w-8 h-8 rounded-xl disabled:opacity-60"
-                disabled={addedToLibRef.current === true ? true : false}
-              >
-                {addedToLibRef.current === true ? (
-                  alreadyInLibRef.current === true ? (
-                    <BiErrorCircle />
-                  ) : (
-                    <BiCheckCircle />
-                  )
-                ) : (
-                  <BiPlusCircle />
-                )}
-              </button>
-            </div>
-            <div className="border-primary w-4/5 border-2 p-4">
+          <div className="p-16 space-x-2 flex 2xl:flex-row flex-col justify-between text-black">
+            <DetailsCoverCard userId={userIdRef.current} id={resultsRef.current.id} title={resultsRef.current.title} cover={resultsRef.current.cover} creator={resultsRef.current.creator}/>
+            <div className="w-4/5 p-4">
               <p className="whitespace-pre-line">
                 {resultsRef.current.summary}
               </p>
             </div>
-            <div className="border-primary flex-col flex justify-between w-4/5 border-2 p-4">
+            <div className="flex-col flex justify-between w-4/5 p-4">
               <div></div>
               <div>
                 <h2>Genres:</h2>
                 {resultsRef.current.genres
-                  ? resultsRef.current.genres.map((genre: { name: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | PromiseLikeOfReactNode | null | undefined; }, index: Key | null | undefined) => {
-                      return <p key={index}>{genre.name}</p>;
-                    })
+                  ? resultsRef.current.genres.map(
+                      (
+                        genre: {
+                          name:
+                            | string
+                            | number
+                            | boolean
+                            | ReactElement<
+                                any,
+                                string | JSXElementConstructor<any>
+                              >
+                            | Iterable<ReactNode>
+                            | ReactPortal
+                            | PromiseLikeOfReactNode
+                            | null
+                            | undefined;
+                        },
+                        index: Key | null | undefined
+                      ) => {
+                        return <p key={index}>{genre.name}</p>;
+                      }
+                    )
                   : null}
               </div>
             </div>
