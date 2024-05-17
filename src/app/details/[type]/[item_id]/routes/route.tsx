@@ -119,8 +119,9 @@ async function handleGameDetails(body: any) {
   
       const data = await response.json();
       console.log(data);
+      const companyCheck = Array.isArray(data) && data.length > 0 && data[0].involved_companies !== undefined && data[0].involved_companies !== null && data[0].involved_companies.length > 0;
       // Additional request for company details if needed
-      if (data[0].involved_companies){
+      if (companyCheck){
       const bodyData2 =  `fields *; where id = ${data[0].involved_companies[0].company};`
       const url2 = "https://api.igdb.com/v4/companies";
       const response2 = await fetch(url2, {

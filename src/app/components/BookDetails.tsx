@@ -120,6 +120,7 @@ const BookDetails: React.FC<Params> = ({ params }) => {
       data.cover = bookDetails![0].cover;
       data.title = data.volumeInfo.title;
       data.creator = data.volumeInfo.authors?data.volumeInfo.authors[0]:"Unknown";
+      data.subtitle = data.volumeInfo.subtitle?data.volumeInfo.subtitle:"";
       setResults(data);
       setIsLoading(false);
     }
@@ -142,7 +143,7 @@ const BookDetails: React.FC<Params> = ({ params }) => {
         ) : (
           <div className="p-16 space-x-2 flex 2xl:flex-row flex-col justify-between text-black">
             <div className="flex-row content-center w-90">
-              <DetailsCoverCard userId={userIdRef.current} id={resultsRef.current.id} title={resultsRef.current.title} cover={resultsRef.current.cover} creator={resultsRef.current.creator}/>
+              <DetailsCoverCard userId={userIdRef.current} id={resultsRef.current.id} title={resultsRef.current.title} subtitle={resultsRef.current.subtitle} cover={resultsRef.current.cover} creator={resultsRef.current.creator}/>
               
               {/*description*/}
               <div className="p-24">

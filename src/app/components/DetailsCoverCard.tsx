@@ -1,3 +1,10 @@
+/*******************************
+ * By Griffin Jack
+ * Purpose: Component to display cover and title of a media item
+ * Inputs:  item id, title, cover, creator, and subtitle, plus the userID if present
+ *******************************/
+
+
 import React, {useEffect} from 'react';
 import supabase from "../utils/supabaseClient"; // Import supabase client for database interactions
 import toast from "react-hot-toast";
@@ -5,7 +12,7 @@ import useState from "react-usestateref"; // Import custom useState hook that pr
 import { BiCheckCircle, BiErrorCircle, BiPlusCircle } from "react-icons/bi"; // Import icons from react-icons library
 import Image from 'next/image';
 
-interface DetailsCardProps {
+interface DetailsCoverCardProps {
     id: string;
     title: string;
     cover: string;
@@ -14,7 +21,7 @@ interface DetailsCardProps {
     subtitle?: string;
 }
 
-const DetailsCoverCard: React.FC<DetailsCardProps> = ({id, title, cover, creator, userId, subtitle = ""}) => {
+const DetailsCoverCard: React.FC<DetailsCoverCardProps> = ({id, title, cover, creator, userId, subtitle = ""}) => {
   console.log("userId:", userId); // Make sure this isn't an object unless expected
   console.log("id:", id); // Make sure this isn't an object unless expected
   console.log("title:", title); // Make sure this isn't an object unless expected
@@ -78,9 +85,11 @@ const DetailsCoverCard: React.FC<DetailsCardProps> = ({id, title, cover, creator
                 <h1 className="text-3xl font-bold">
                     {title}
                 </h1>
-                <h2 className="text-xl">
-                    {subtitle} by{" "}
-                    {creator}
+                <h2 className="italic text-xl">
+                    {subtitle}
+                </h2>
+                <h2 class="text-lg">
+                by{" "}{creator}
                 </h2>
               </div>
               <div className="flex flex-col mr-8 h-500 w-500 mt-6 mb-6 items-center bg-secondary/20 rounded-2xl">

@@ -10,6 +10,7 @@ import { BiCheckCircle, BiErrorCircle, BiPlusCircle } from "react-icons/bi";
 import toast from "react-hot-toast";
 import extractDataFromCookie from "../utils/extractCookie";
 import DetailsCoverCard from "./DetailsCoverCard";
+import DetailsDescriptionCard from "./DetailsDescriptionCard";
 
 
 interface Params {
@@ -27,6 +28,7 @@ const AlbumDetails: React.FC<Params> = ({ params }) => {
   const [isLoading, setIsLoading, isLoadingRef] = useState(true); // Manages loading state
   const [cover, setCover, coverRef] = useState(""); // Stores album cover URL
   const [userId, setUserId, userIdRef] = useState(""); // State for storing user ID
+  const [showDescription, setShowDescription, showDescriptionRef] = useState(false); //
 
   // A function to handle album type selection logic (currently empty)
   /*function selectAlbumType() {
@@ -79,10 +81,13 @@ const AlbumDetails: React.FC<Params> = ({ params }) => {
         toast.error("No details found, try again");
         return;
       } else {
-        data.creator = albumDetails![0].creator;
-        data.title = albumDetails![0].title;
-        data.cover = coverRef.current;
-        setResults(data);
+        data[0].creator = albumDetails![0].creator;
+        data[0].title = albumDetails![0].title;
+        data[0].cover = coverRef.current;
+        if (data[0].album.wiki){
+          setShowDescription(true);
+        }
+        setResults(data[0]);
         setIsLoading(false);
         return data;
       } 
@@ -104,18 +109,17 @@ const AlbumDetails: React.FC<Params> = ({ params }) => {
           <div className="p-16 space-x-2 flex 2xl:flex-row flex-col justify-between border-black rounded text-black">
             {/* Album info section */}
             <DetailsCoverCard userId={userIdRef.current} id={resultsRef.current.id} title={resultsRef.current.title} cover={resultsRef.current.cover} creator={resultsRef.current.creator} />
-
+            {showDescriptionRef.current ? (
+            <DetailsDescriptionCard description={resultsRef.current.album.wiki.summary}/>
+            ) : null}
             <div className="border-black rounded w-4/5 p-4">
               {/* Album wiki and track listing */}
-              <div className="border-black rounded p-4">
-                {results.wiki ? results.wiki.content : ""}
-              </div>
               <div className="border-black rounded p-4">
                 <ol>
                   <h2 className="text-xl font-semibold mb-8">Track listing</h2>
                   {/* Dynamic rendering of track list based on the album type */}
-                  {resultsRef.current[0].album.tracks?.track.length ? (
-                    resultsRef.current[0].album.tracks.track.map(
+                  {resultsRef.current.album.tracks?.track.length ? (
+                    resultsRef.current.album.tracks.track.map(
                       (result: { url: string | undefined; name: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | PromiseLikeOfReactNode | null | undefined; duration: number; }, index: number) => {
                         // Mapping through each track and displaying its details
                         return (
@@ -144,32 +148,32 @@ const AlbumDetails: React.FC<Params> = ({ params }) => {
                         1.{" "}
                         <a
                           href={
-                            resultsRef.current[0].album.tracks
-                              ? resultsRef.current[0].album.tracks.track.url
-                              : resultsRef.current[0].album.url
+                            resultsRef.current.album.tracks
+                              ? resultsRef.current.album.tracks.track.url
+                              : resultsRef.current.album.url
                           }
                         >
-                          {resultsRef.current[0].album.tracks
-                            ? resultsRef.current[0].album.tracks.track.name
-                            : resultsRef.current[0].album.name}
+                          {resultsRef.current.album.tracks
+                            ? resultsRef.current.album.tracks.track.name
+                            : resultsRef.current.album.name}
                         </a>
                       </div>
-                      {resultsRef.current[0].album &&
-                      resultsRef.current[0].album.tracks ? (
+                      {resultsRef.current.album &&
+                      resultsRef.current.album.tracks ? (
                         // Displaying runtime if available
                         <div className="w/1/5">
                           RUNTIME:{" "}
                           {Math.floor(
-                            resultsRef.current[0].album.tracks.track.duration / 60
+                            resultsRef.current.album.tracks.track.duration / 60
                           )}
                           :
-                          {resultsRef.current[0].album.tracks.track.duration % 60 <
+                          {resultsRef.current.album.tracks.track.duration % 60 <
                           10
                             ? `0${
-                                resultsRef.current[0].album.tracks.track.duration %
+                                resultsRef.current.album.tracks.track.duration %
                                 60
                               }`
-                            : resultsRef.current[0].album.tracks.track.duration %
+                            : resultsRef.current.album.tracks.track.duration %
                               60}
                         </div>
                       ) : null}
