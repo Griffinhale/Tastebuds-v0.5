@@ -5,11 +5,11 @@ import { useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import useState from "react-usestateref";
 import { BiCheckCircle, BiPlusCircle, BiErrorCircle } from "react-icons/bi";
-import Header from "./Header";
+import Header from "../Header";
 import { useRouter, useSearchParams } from "next/navigation";
-import supabase from "../utils/supabaseClient";
+import supabase from "../../utils/supabaseClient";
 import SearchModal from "./SearchModal";
-import extractDataFromCookie from "../utils/extractCookie";
+import extractDataFromCookie from "../../utils/extractCookie";
 import toast from "react-hot-toast";
 
 // Define a SearchResult component

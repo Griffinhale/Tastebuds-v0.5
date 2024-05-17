@@ -3,12 +3,12 @@
 import { useRouter, usePathname } from "next/navigation";
 import { Suspense, useEffect } from "react";
 import useState from "react-usestateref";
-import Library from "../components/Library";
+import Library from "../components/library/Library";
 import Header from "../components/Header";
-import AlbumDetails from "../components/AlbumDetails";
-import BookDetails from "../components/BookDetails";
-import GameDetails from "../components/GameDetails";
-import VideoDetails from "../components/VideoDetails";
+import AlbumDetails from "../components/details/AlbumDetails";
+import BookDetails from "../components/details/BookDetails";
+import GameDetails from "../components/details/GameDetails";
+import VideoDetails from "../components/details/VideoDetails";
 import supabase from "../utils/supabaseClient";
 import { get } from "http";
 

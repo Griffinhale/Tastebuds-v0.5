@@ -2,10 +2,10 @@
 "use client";
 import { useEffect } from "react";
 import useState from "react-usestateref";
-import SearchModal from "./SearchModal";
-import Header from "./Header";
-import supabase from "../utils/supabaseClient";
-import extractDataFromCookie from "../utils/extractCookie";
+import SearchModal from "../search/SearchModal";
+import Header from "../Header";
+import supabase from "../../utils/supabaseClient";
+import extractDataFromCookie from "../../utils/extractCookie";
 
 // Define a component to display an item in a library
 const LibraryItem = ({ result }: any) => {

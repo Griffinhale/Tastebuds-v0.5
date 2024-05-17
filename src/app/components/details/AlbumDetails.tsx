@@ -5,10 +5,10 @@
 // Import necessary hooks and utilities
 import { JSXElementConstructor, Key, PromiseLikeOfReactNode, ReactElement, ReactNode, ReactPortal, useEffect } from "react";
 import useState from "react-usestateref";
-import supabase from "../utils/supabaseClient"; // Importing Supabase client
+import supabase from "../../utils/supabaseClient"; // Importing Supabase client
 import { BiCheckCircle, BiErrorCircle, BiPlusCircle } from "react-icons/bi";
 import toast from "react-hot-toast";
-import extractDataFromCookie from "../utils/extractCookie";
+import extractDataFromCookie from "../../utils/extractCookie";
 import DetailsCoverCard from "./DetailsCoverCard";
 import DetailsDescriptionCard from "./DetailsDescriptionCard";
 

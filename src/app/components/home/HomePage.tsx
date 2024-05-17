@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Header from "./Header"
+import Header from "../Header"
 //homepage layout, currently a placeholder
 const HomePage = () => {
   return (

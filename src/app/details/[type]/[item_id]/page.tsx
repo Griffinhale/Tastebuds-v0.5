@@ -1,15 +1,15 @@
 "use client";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
-import HomePage from "../../../components/HomePage";
+import HomePage from "../../../components/home/HomePage";
 import Header from "../../../components/Header";
-import Library from "../../../components/Library";
+import Library from "../../../components/library/Library";
 import { useSearchParams } from "next/navigation";
-import SearchResults from "../../../components/SearchResults";
-import AlbumDetails from "../../../components/AlbumDetails";
-import BookDetails from "@/app/components/BookDetails";
-import GameDetails from "@/app/components/GameDetails";
-import VideoDetails from "@/app/components/VideoDetails";
+import SearchResults from "../../../components/search/SearchResults";
+import AlbumDetails from "../../../components/details/AlbumDetails";
+import BookDetails from "@/app/components/details/BookDetails";
+import GameDetails from "@/app/components/details/GameDetails";
+import VideoDetails from "@/app/components/details/VideoDetails";
 
 const Home = () => {
   const router = useRouter();

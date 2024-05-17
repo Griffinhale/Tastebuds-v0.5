@@ -2,8 +2,8 @@
 "use client";
 import {JSXElementConstructor,Key,PromiseLikeOfReactNode,ReactElement,ReactNode,ReactPortal,useEffect} from "react";
 import useState from "react-usestateref";
-import supabase from "../utils/supabaseClient";
-import extractDataFromCookie from "../utils/extractCookie";
+import supabase from "../../utils/supabaseClient";
+import extractDataFromCookie from "../../utils/extractCookie";
 import DetailsCoverCard from "./DetailsCoverCard";
 
 interface Params {

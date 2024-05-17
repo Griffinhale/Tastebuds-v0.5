@@ -8,7 +8,7 @@ interface DetailsDescriptionCardProps{
 const DetailsDescriptionCard: React.FC<DetailsDescriptionCardProps> = ({description}) => {
     useEffect(() => console.log(description))
   return (
-    <div class="bg-quartiary/90 rounded-xl flex flex-col items-center lg:flex-row p-6">
+    <div className="bg-quartiary/90 rounded-xl flex flex-col items-center lg:flex-row p-6">
     {description}
     </div>
   )

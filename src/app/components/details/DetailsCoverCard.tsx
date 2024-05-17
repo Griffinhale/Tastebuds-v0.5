@@ -6,7 +6,7 @@
 
 
 import React, {useEffect} from 'react';
-import supabase from "../utils/supabaseClient"; // Import supabase client for database interactions
+import supabase from "../../utils/supabaseClient"; // Import supabase client for database interactions
 import toast from "react-hot-toast";
 import useState from "react-usestateref"; // Import custom useState hook that provides a ref to the state
 import { BiCheckCircle, BiErrorCircle, BiPlusCircle } from "react-icons/bi"; // Import icons from react-icons library
@@ -88,7 +88,7 @@ const DetailsCoverCard: React.FC<DetailsCoverCardProps> = ({id, title, cover, cr
                 <h2 className="italic text-xl">
                     {subtitle}
                 </h2>
-                <h2 class="text-lg">
+                <h2 className="text-lg">
                 by{" "}{creator}
                 </h2>
               </div>

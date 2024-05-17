@@ -1,8 +1,8 @@
 "use client"
 import { useRouter, usePathname } from 'next/navigation';
-import HomePage from "./components/HomePage"
-import Library from './components/Library';
-import SearchResults from './components/SearchResults';
+import HomePage from "./components/home/HomePage"
+import Library from './components/library/Library';
+import SearchResults from './components/search/SearchResults';
 
 const Home = () => {
   const router = useRouter();

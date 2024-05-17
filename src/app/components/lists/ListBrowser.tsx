@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import extractDataFromCookie from "../utils/extractCookie";
+import extractDataFromCookie from "../../utils/extractCookie";
 import useState from "react-usestateref";
 
 //show all lists, most popular lists, most recent lists, etc.

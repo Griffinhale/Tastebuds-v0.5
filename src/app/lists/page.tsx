@@ -2,7 +2,7 @@
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import Header from "@/app/components/Header";
-import ListBrowser from "../components/ListBrowser";
+import ListBrowser from "../components/lists/ListBrowser";
 
 const Home = () => {
   const router = useRouter();

@@ -2,7 +2,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import Header from "@/app/components/Header";
-import ListView from "@/app/components/ListView";
+import ListView from "@/app/components/lists/ListView";
 
 const Home = () => {
   const pathname = usePathname();

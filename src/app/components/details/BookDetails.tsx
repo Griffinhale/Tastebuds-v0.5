@@ -3,9 +3,9 @@
 import { JSXElementConstructor, Key, PromiseLikeOfReactNode, ReactElement, ReactNode, ReactPortal, useEffect } from "react"; // Import useEffect hook from React for handling side effects
 import useState from "react-usestateref"; // Import custom useState hook that provides a ref to the state
 
-import supabase from "../utils/supabaseClient"; // Import supabase client for database interactions
+import supabase from "../../utils/supabaseClient"; // Import supabase client for database interactions
 import * as DOMPurify from "dompurify"; // Import DOMPurify for sanitizing HTML to prevent XSS attacks
-import extractDataFromCookie from "../utils/extractCookie"; // Import function to extract data from cookies
+import extractDataFromCookie from "../../utils/extractCookie"; // Import function to extract data from cookies
 import toast from "react-hot-toast";
 import DetailsCoverCard from "./DetailsCoverCard";
 
