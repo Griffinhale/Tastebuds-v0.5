@@ -34,12 +34,12 @@ console.log("GETREQUEST")
 
 
 //change this to either PUT or PATCH (thinking PUT rn, even though it has to send whole list I think it will be easier to track changes)
-export async function UPDATE(req: NextRequest) {
+/*export async function UPDATE(req: NextRequest) {
 //update existing list, either adding or removing items\
 //confirm user_id for that list, if not correct, return error
 //grab current listItems, compare with req, add/remove the diff, change order as needed
 
-}
+}*/
 
 export async function DELETE(req: NextRequest) {
 //remove list in entirety
