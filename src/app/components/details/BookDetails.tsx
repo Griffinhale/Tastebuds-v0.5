@@ -121,6 +121,9 @@ const BookDetails: React.FC<Params> = ({ params }) => {
       data.title = data.volumeInfo.title;
       data.creator = data.volumeInfo.authors?data.volumeInfo.authors[0]:"Unknown";
       data.subtitle = data.volumeInfo.subtitle?data.volumeInfo.subtitle:"";
+      data.api_id = data.volumeInfo.id;
+      data.id = params[1];
+      data.type = params[0];
       setResults(data);
       setIsLoading(false);
     }

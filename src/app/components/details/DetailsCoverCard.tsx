@@ -5,7 +5,7 @@
  *******************************/
 
 
-import React, {useEffect} from 'react';
+import React, {useEffect, useCallback} from 'react';
 import supabase from "../../utils/supabaseClient"; // Import supabase client for database interactions
 import toast from "react-hot-toast";
 import useState from "react-usestateref"; // Import custom useState hook that provides a ref to the state
@@ -45,6 +45,7 @@ const DetailsCoverCard: React.FC<DetailsCoverCardProps> = ({id, title, cover, cr
         let isInUserLibrary = false;
         // Check if the book is already in the library
         if (existingItem) {
+          console.log("in lib?");
           const filtered = existingItem.filter(
             (libItem) => libItem.item_id === id
           );
@@ -61,6 +62,7 @@ const DetailsCoverCard: React.FC<DetailsCoverCardProps> = ({id, title, cover, cr
         // Add book to the library if it's not already there
         if (!isInUserLibrary) {
           setAddedToLib(true);
+          console.log(id, userId);
           const { error } = await supabase.from("library").insert({
             item_id: id,
             user_id: userId,
@@ -73,11 +75,9 @@ const DetailsCoverCard: React.FC<DetailsCoverCardProps> = ({id, title, cover, cr
         }
       };
     
-    useEffect(() => {
-        console.log("CoverCard Loaded");
-        console.log(title);
-        console.log(cover, creator);
-    })
+    useEffect((() =>
+        setAddedToLib(false))
+   , [title, setAddedToLib]);
   
     return (
     <div className="bg-quartiary/90 rounded-xl flex flex-col lg:flex-row items-center lg:justify-start justify-between mt-6 mb-6 p-4 2xl:mt-96 2xl:mb-96 mr-6">

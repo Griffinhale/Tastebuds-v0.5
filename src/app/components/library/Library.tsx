@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import { useEffect } from "react";
+import Image from "next/image";
 import useState from "react-usestateref";
 import SearchModal from "../search/SearchModal";
 import Header from "../Header";
@@ -11,7 +12,7 @@ import extractDataFromCookie from "../../utils/extractCookie";
 const LibraryItem = ({ result }: any) => {
   // State to manage modal visibility
   const [isModalOpen, setIsModalOpen, isModalOpenRef] = useState(false);
-  
+
   // Function to close the modal
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -28,27 +29,13 @@ const LibraryItem = ({ result }: any) => {
   const getButtonStyle = (type: string) => {
     // Return specific styles for different item types
     if (type === "book") {
-      return "items-center justify-center h-80 flex flex-col  mx-2 px-2 hover:ring-4 rounded-full relative bg-red-500/30";
+      return "items-center justify-center h-80 w-60 flex flex-col mx-2 px-2 hover:ring-4 rounded-lg relative bg-red-500/30";
     } else if (type === "album") {
-      return "items-center justify-center h-80 flex flex-col mx-2 px-2  hover:ring-4 rounded-full relative bg-green-500/30";
+      return "items-center justify-center h-80 w-60 flex flex-col mx-2 px-2 hover:ring-4 rounded-lg relative bg-green-500/30";
     } else if (type === "video") {
-      return "items-center justify-center h-80 flex flex-col mx-2 px-2  hover:ring-4 rounded-full relative bg-blue-500/30";
+      return "items-center justify-center h-80 w-60 flex flex-col mx-2 px-2 hover:ring-4 rounded-lg relative bg-blue-500/30";
     } else if (type === "game") {
-      return "items-center justify-center h-80 flex flex-col mx-2 px-2  hover:ring-4 rounded-full relative bg-slate-500/30";
-    }
-  };
-
-  // Function to get image style based on the type of item
-  const getImgStyle = (type: string) => {
-    // Return specific styles for different item types
-    if (type === "book") {
-      return "w-45 h-60 rounded-xl overflow-hidden";
-    } else if (type === "album") {
-      return "w-60 h-60 rounded-xl overflow-hidden";
-    } else if (type === "video") {
-      return "w-45 h-60 rounded-xl overflow-hidden";
-    } else if (type === "game") {
-      return "w-45 h-60 rounded-xl overflow-hidden";
+      return "items-center justify-center h-80 w-60 flex flex-col mx-2 px-2 hover:ring-4 rounded-lg relative bg-slate-500/30";
     }
   };
 
@@ -59,26 +46,28 @@ const LibraryItem = ({ result }: any) => {
         onClick={handleOpenModal}
         className={getButtonStyle(result.items.type)}
       >
-        <div className="flex-col flex space-y-4 justify-center items-center">
-          <img
-            className={getImgStyle(result.items.type)}
-            src={result.items ? result.items.cover : ""}
-            alt="cover"
-          />
-          <h1 className="bg-secondary/70  rounded-xl text-white py-4">
-            {result.items ? result.items.title : ""}
-          </h1>
+        <div className="relative w-full h-full overflow-hidden rounded-lg">
+          <div className="relative w-full h-full overflow-hidden rounded-lg transition-transform duration-300 ease-in-out group hover:overflow-visible">
+            <Image
+              className="absolute top-0 left-0 w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
+              layout="fill"
+              src={result.items.cover}
+              alt="cover"
+            />
+          </div>
         </div>
+        <h1 className="bg-secondary/70 rounded-xl text-white py-4 mt-4">
+          {result.items.title}
+        </h1>
       </button>
       <div className="w-[20%]">
         <SearchModal
-          result={result.items}
+          result={result}
           show={isModalOpenRef.current}
           onBlur={handleCloseModal}
           onClose={handleCloseModal}
         />
       </div>
-      
     </div>
   );
 };
@@ -92,9 +81,15 @@ const Library = () => {
   // Function to fetch library data from the database
   async function getLib(user_id: string) {
     const { data, error } = await supabase
-      .from("library")
-      .select("user_id, item_id, items(*)")
-      .eq("user_id", user_id);
+    .from("library")
+    .select(`
+      user_id,
+      item_id,
+      items (
+        *
+      )
+    `)
+    .eq("user_id", user_id);
     console.log("library: ", data);
     if (data === null) {
       return [];
@@ -201,7 +196,7 @@ const Library = () => {
               {resultsRef.current.length > 0 ? (
                 resultsRef.current.map((result: any, index: number) => {
                   return (
-                    <LibraryItem key={result.id || index} result={result} />
+                    <LibraryItem key={result.item_id || index} result={result} />
                   );
                 })
               ) : (

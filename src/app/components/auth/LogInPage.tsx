@@ -1,8 +1,8 @@
 import { useEffect } from "react";
-import Header from "./Header";
-import supabase from "../utils/supabaseClient";
+import Header from "../Header";
+import supabase from "../../utils/supabaseClient";
 import { useRouter } from "next/navigation";
-import extractDataFromCookie from "../utils/extractCookie";
+import extractDataFromCookie from "../../utils/extractCookie";
 import useState from "react-usestateref";
 
 // Define a component for the login page

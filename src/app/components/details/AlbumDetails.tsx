@@ -84,6 +84,8 @@ const AlbumDetails: React.FC<Params> = ({ params }) => {
         data[0].creator = albumDetails![0].creator;
         data[0].title = albumDetails![0].title;
         data[0].cover = coverRef.current;
+        data[0].id = params[1];
+        data[0].type = params[0];
         if (data[0].album.wiki){
           setShowDescription(true);
         }

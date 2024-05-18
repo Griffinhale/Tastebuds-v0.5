@@ -69,6 +69,7 @@ const VideoDetails: React.FC<Params> = ({ params }) => {
       );
       let data = await response.json();
       data.video_type = videoDetails![0].video_type;
+      data.type = data.video_type;
       if (data.credits && !data.creator) {
         data.creator = data.credits.crew.l
           ? data.credits.crew[0].name

@@ -58,11 +58,12 @@ const GameDetails: React.FC<Params> = ({ params }) => {
       const data = await response.json();
 
       // Set the results and update loading state
-      data[0].cover = "http:" + coverRef.current;
+      data[0].cover = coverRef.current;
       console.log(data[0].cover)
       data[0].title = data[0].name;
       data[0].api_id = data[0].id;
       data[0].id = params[1];
+      data[0].type = params[0];
       if (data[0].companyData.length == 0) {
         data[0].creator = "Unknown";
       } else {

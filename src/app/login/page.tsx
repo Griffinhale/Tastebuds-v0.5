@@ -1,10 +1,9 @@
 "use client";
 import { useRouter, usePathname } from "next/navigation";
-import HomePage from "../components/HomePage";
+import HomePage from "../components/home/HomePage";
 import Library from "../components/library/Library";
 import SearchResults from "../components/search/SearchResults";
-import LogInPage from "../components/LogInPage";
-import { BsFileBreakFill } from "react-icons/bs";
+import LogInPage from "../components/auth/LogInPage";
 
 const Home = () => {
   const router = useRouter();

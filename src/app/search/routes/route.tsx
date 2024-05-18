@@ -460,6 +460,7 @@ async function handleGameSearch(body: { term: string; page: number }) {
           return {
             ...apiGame,
             id: dbGame.id,
+            cover: "http:" + dbGame.cover
           }
       })
       return combinedGames;
