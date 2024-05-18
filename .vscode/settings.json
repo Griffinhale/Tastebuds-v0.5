@@ -4,14 +4,18 @@
     "bungus",
     "dompurify",
     "Endof",
+    "favorited",
     "getinfo",
+    "GETREQUEST",
     "IGDB",
     "isloading",
+    "listitems",
     "quartiary",
     "randomizer",
     "signup",
     "tailwindcss",
     "TMDB",
+    "userlists",
     "usestateref"
   ],
   "files.associations": { "*.css": "tailwindcss" }
