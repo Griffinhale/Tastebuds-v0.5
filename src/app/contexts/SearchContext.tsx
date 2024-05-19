@@ -56,7 +56,9 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
   const [endOfResults, setEndOfResults] = useState<boolean>(false);
   const [category, setCategory] = useState<string>('Your Library');
   const [term, setTerm] = useState<string>('');
-
+  //refactor this - it should have a function that calls all fetch functions at once, which should be callable by SearchResults
+  //It should display them all, and when on multi-media page scrolling will call this function. 
+  //When users click categories, the searchResultsGrid should do a filter before it maps so that only the correct media type is shown
   const search = async (query: string, page: number, category: string) => {
     setIsLoading(true);
     setEndOfResults(false);
