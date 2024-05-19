@@ -1,7 +1,7 @@
 "use client";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
-import Header from "@/app/components/Header";
+import Header from "../components/common/Header";
 import ListBrowser from "../components/lists/ListBrowser";
 
 const Home = () => {
