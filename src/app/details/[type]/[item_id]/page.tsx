@@ -1,40 +1,24 @@
 "use client";
-import { useRouter, usePathname } from "next/navigation";
-import { useEffect } from "react";
-import HomePage from "../../../components/home/HomePage";
-import Header from "../../../components/Header";
+import { usePathname } from "next/navigation";
+import Header from "../../../components/common/Header";
 import Library from "../../../components/library/Library";
-import { useSearchParams } from "next/navigation";
-import SearchResults from "../../../components/search/SearchResults";
 import AlbumDetails from "../../../components/details/AlbumDetails";
 import BookDetails from "@/app/components/details/BookDetails";
 import GameDetails from "@/app/components/details/GameDetails";
 import VideoDetails from "@/app/components/details/VideoDetails";
 
-const Home = () => {
-  const router = useRouter();
+const DetailPage = () => {
   const pathname = usePathname();
-  const params: any = pathname.split("/").slice(2);
-  
-  let PageComponent;
+  const params = pathname.split("/").slice(2);
 
-  switch (params[0]) {
-    case "book":
-      PageComponent = BookDetails;
-      break;
-    case "video":
-      PageComponent = VideoDetails;
-      break;
-    case "game":
-      PageComponent = GameDetails;
-      break;
-    case "album":
-      PageComponent = AlbumDetails;
-      break;
-    default:
-      PageComponent = Library;
-      break;
-  }
+  const detailComponents: { [key: string]: React.FC<any> } = {
+    book: BookDetails,
+    video: VideoDetails,
+    game: GameDetails,
+    album: AlbumDetails,
+  };
+
+  const PageComponent = detailComponents[params[0]] || Library;
 
   return (
     <div className="flex flex-col h-4/5 min-h-[1200px] w-full rounded-xl text-primary">
@@ -43,7 +27,7 @@ const Home = () => {
         <PageComponent params={params} />
       </div>
     </div>
-  )
+  );
 };
 
-export default Home;
+export default DetailPage;

@@ -3,7 +3,7 @@
 import {JSXElementConstructor,Key,PromiseLikeOfReactNode,ReactElement,ReactNode,ReactPortal,useEffect} from "react";
 import useState from "react-usestateref";
 import supabase from "../../utils/supabaseClient";
-import extractDataFromCookie from "../../utils/extractCookie";
+import {useUser} from "../../contexts/UserContext";
 import DetailsCoverCard from "./DetailsCoverCard";
 
 interface Params {
@@ -16,19 +16,8 @@ const GameDetails: React.FC<Params> = ({ params }) => {
   const [results, setResults, resultsRef] = useState<any>([]);
   const [isLoading, setIsLoading, isLoadingRef] = useState(true);
   const [cover, setCover, coverRef] = useState("");
-  const [userId, setUserId, userIdRef] = useState("");
+  const {user} = useUser();
 
-  // Extract user data from cookie
-  useEffect(() => {
-    const data = extractDataFromCookie();
-    if (data) {
-      setUserId(data.userId);
-    } else {
-      console.log("auth_data not found in cookie");
-      setUserId("");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Fetch further game details on component mount
   useEffect(() => {
@@ -71,7 +60,6 @@ const GameDetails: React.FC<Params> = ({ params }) => {
       }
 
       setResults(data[0]);
-      console.log(userIdRef.current, resultsRef.current);
       setIsLoading(false);
       return data;
     }
@@ -90,7 +78,7 @@ const GameDetails: React.FC<Params> = ({ params }) => {
           <div className="text-black">loading</div>
         ) : (
           <div className="p-16 space-x-2 flex 2xl:flex-row flex-col justify-between text-black">
-            <DetailsCoverCard userId={userIdRef.current} id={resultsRef.current.id} title={resultsRef.current.title} cover={resultsRef.current.cover} creator={resultsRef.current.creator}/>
+            <DetailsCoverCard/>
             <div className="w-4/5 p-4">
               <p className="whitespace-pre-line">
                 {resultsRef.current.summary}

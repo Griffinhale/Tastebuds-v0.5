@@ -8,7 +8,7 @@ import useState from "react-usestateref";
 import supabase from "../../utils/supabaseClient"; // Importing Supabase client
 import { BiCheckCircle, BiErrorCircle, BiPlusCircle } from "react-icons/bi";
 import toast from "react-hot-toast";
-import extractDataFromCookie from "../../utils/extractCookie";
+import { useUser } from "../../contexts/UserContext";
 import DetailsCoverCard from "./DetailsCoverCard";
 import DetailsDescriptionCard from "./DetailsDescriptionCard";
 
@@ -27,7 +27,7 @@ const AlbumDetails: React.FC<Params> = ({ params }) => {
   const [results, setResults, resultsRef] = useState<any>([]); // Stores fetched data, its setter, and a ref
   const [isLoading, setIsLoading, isLoadingRef] = useState(true); // Manages loading state
   const [cover, setCover, coverRef] = useState(""); // Stores album cover URL
-  const [userId, setUserId, userIdRef] = useState(""); // State for storing user ID
+  const { user } = useUser(); // Use the context for user authentication
   const [showDescription, setShowDescription, showDescriptionRef] = useState(false); //
 
   // A function to handle album type selection logic (currently empty)
@@ -36,18 +36,6 @@ const AlbumDetails: React.FC<Params> = ({ params }) => {
     console.log(resultsRef.current[0].album);
     console.log(typeof resultsRef.current[0].album === "object");
   }*/
-
-  // Extract user data from cookies
-  useEffect(() => { 
-    const data = extractDataFromCookie();
-    if (data) {
-      setUserId(data.userId); // Set user ID state from extracted data
-    } else {
-      console.log("auth_data not found in cookie");
-      setUserId(""); // Clear user ID if auth data not found
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Fetch further details from API
   useEffect(() => {
@@ -110,9 +98,9 @@ const AlbumDetails: React.FC<Params> = ({ params }) => {
           // Render the album details if not loading
           <div className="p-16 space-x-2 flex 2xl:flex-row flex-col justify-between border-black rounded text-black">
             {/* Album info section */}
-            <DetailsCoverCard userId={userIdRef.current} id={resultsRef.current.id} title={resultsRef.current.title} cover={resultsRef.current.cover} creator={resultsRef.current.creator} />
+            <DetailsCoverCard />
             {showDescriptionRef.current ? (
-            <DetailsDescriptionCard description={resultsRef.current.album.wiki.summary}/>
+            <DetailsDescriptionCard/>
             ) : null}
             <div className="border-black rounded w-4/5 p-4">
               {/* Album wiki and track listing */}

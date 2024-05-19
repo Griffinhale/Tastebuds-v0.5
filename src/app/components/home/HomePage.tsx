@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Header from "../Header";
+import Header from "../common/Header";
 import RecentActivityItem from "./RecentActivityItem";
 import supabase from "../../utils/supabaseClient";
 

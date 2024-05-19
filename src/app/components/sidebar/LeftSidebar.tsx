@@ -6,22 +6,14 @@ import { LuLibrary, LuHome, LuSearch } from "react-icons/lu";
 import { IoListSharp } from "react-icons/io5";
 import { FaUserFriends } from "react-icons/fa";
 import { MdForum } from "react-icons/md";
-import extractDataFromCookie from "../../utils/extractCookie";
 import SearchInput from "./SearchInput";
 import SidebarLink from "./SidebarLink";
+import {useUser} from "../../contexts/UserContext";
 
 const LeftSidebar = () => {
-  const [userId, setUserId, userIdRef] = useState("");
+  const {user} = useUser();
   const router = useRouter();
 
-  useEffect(() => {
-    const data = extractDataFromCookie();
-    if (data) {
-      setUserId(data.userId);
-    } else {
-      setUserId("");
-    }
-  }, [setUserId]);
 
   const handleSearch = (term: string) => {
     router.push(`/search?term=${encodeURIComponent(term)}`);
@@ -42,7 +34,7 @@ const LeftSidebar = () => {
             <SearchInput onSearch={handleSearch} />
             <div className="m-4 mt-8 -ml-4 text-2xl pb-20 space-y-6 border-s-2 border-primary">
               <SidebarLink href="/" icon={<LuHome />} label="Home" />
-              {userIdRef.current && (
+              {user && (
                 <SidebarLink href="/library" icon={<LuLibrary />} label="Library" />
               )}
               <SidebarLink

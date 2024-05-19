@@ -2,7 +2,7 @@
 "use client"; // Directive to ensure this code runs on the client side in a Next.js application
 import { JSXElementConstructor, Key, PromiseLikeOfReactNode, ReactElement, ReactNode, ReactPortal, useEffect } from "react"; // Import useEffect hook from React for handling side effects
 import useState from "react-usestateref"; // Import custom useState hook that provides a ref to the state
-
+import { useUser } from "../../contexts/UserContext";
 import supabase from "../../utils/supabaseClient"; // Import supabase client for database interactions
 import * as DOMPurify from "dompurify"; // Import DOMPurify for sanitizing HTML to prevent XSS attacks
 import extractDataFromCookie from "../../utils/extractCookie"; // Import function to extract data from cookies
@@ -18,7 +18,7 @@ const BookDetails: React.FC<Params> = ({ params }) => {
   // State declarations for various aspects of the component
   const [results, setResults, resultsRef] = useState<any>([]); // State to hold book details
   const [isLoading, setIsLoading, isLoadingRef] = useState(true); // State to track loading status
-  const [userId, setUserId, userIdRef] = useState(""); // State for storing user ID
+  const { user } = useUser(); // Use the context for user authentication
   let dimensionStr: string = ""; // Variable for formatting book dimensions
 
 
@@ -78,17 +78,6 @@ const BookDetails: React.FC<Params> = ({ params }) => {
         return "No dimensions available";
     }
   }
-  // Extract user ID from cookie
-  useEffect(() => {
-    const data = extractDataFromCookie();
-    if (data) {
-      setUserId(data.userId);
-    } else {
-      console.log("auth_data not found in cookie");
-      setUserId("");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   // Grab further details on component mount
   useEffect(() => {
@@ -146,7 +135,7 @@ const BookDetails: React.FC<Params> = ({ params }) => {
         ) : (
           <div className="p-16 space-x-2 flex 2xl:flex-row flex-col justify-between text-black">
             <div className="flex-row content-center w-90">
-              <DetailsCoverCard userId={userIdRef.current} id={resultsRef.current.id} title={resultsRef.current.title} subtitle={resultsRef.current.subtitle} cover={resultsRef.current.cover} creator={resultsRef.current.creator}/>
+              <DetailsCoverCard/>
               
               {/*description*/}
               <div className="p-24">

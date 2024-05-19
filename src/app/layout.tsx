@@ -4,6 +4,13 @@ import { Inter } from "next/font/google";
 import LeftSidebar from "./components/sidebar/LeftSidebar";
 import { Toaster } from "react-hot-toast";
 
+import { UserProvider } from './contexts/UserContext';
+import { LibraryProvider } from './contexts/LibraryContext';
+//import { UIProvider } from './contexts/UIContext';
+//import { ListBuildingProvider } from './contexts/ListBuildingContext';
+import { SearchProvider } from './contexts/SearchContext';
+import { ExpandedItemDetailsProvider } from './contexts/ExpandedItemDetailsContext';
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -19,26 +26,38 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="bg-secondary w-full h-auto">
-          <div className="bg-secondary min-h-screen rounded-xl px-4 h-5/6 flex">
-            <LeftSidebar />
-            <main className="w-full ml-4">
-              {children}
-              <Toaster
-                position="bottom-left"
-                toastOptions={{
-                  // Define default options
-                  className: "",
-                  duration: 2000,
-                  style: {
-                    background: "#363636",
-                    color: "#fff",
-                  },
-                }}
-              />
-            </main>
-          </div>
-        </div>
+        <UserProvider>
+          {/*<UIProvider>*/}
+            {/*<ListBuildingProvider>*/}
+              <SearchProvider>
+                <ExpandedItemDetailsProvider>
+                  <LibraryProvider>
+                    <div className="bg-secondary w-full h-auto">
+                      <div className="bg-secondary min-h-screen rounded-xl px-4 h-5/6 flex">
+                        <LeftSidebar />
+                        <main className="w-full ml-4">
+                          {children}
+                          <Toaster
+                            position="bottom-left"
+                            toastOptions={{
+                              // Define default options
+                              className: "",
+                              duration: 2000,
+                              style: {
+                                background: "#363636",
+                                color: "#fff",
+                              },
+                            }}
+                          />
+                        </main>
+                      </div>
+                    </div>
+                  </LibraryProvider>
+                </ExpandedItemDetailsProvider>
+              </SearchProvider>
+            {/*</ListBuildingProvider>*/}
+          {/*</UIProvider>*/}
+        </UserProvider>
       </body>
     </html>
   );
