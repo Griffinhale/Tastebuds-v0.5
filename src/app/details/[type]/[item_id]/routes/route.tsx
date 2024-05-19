@@ -1,6 +1,7 @@
 import { useSearchParams } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
 import { BsFileBreakFill } from "react-icons/bs";
+import { useExpandedItemDetails} from "../../../../contexts/ExpandedItemDetailsContext"
 let igdbTwitchBearer = "";
 
 //type declarations
@@ -36,6 +37,7 @@ async function getTwitchKeys() {
 // API route to handle POST requests
 export async function POST(req: NextRequest) {
   const body = await req.json();
+  const {setItemDetails} = useExpandedItemDetails();
   let results;
   // Switch case to handle different types of media
   switch(body.type) {
@@ -45,7 +47,7 @@ export async function POST(req: NextRequest) {
     case "video": results = await handleVideoDetails(body); break;
     default: console.error("type of media missing");
   }
-
+  setItemDetails(results)
   // Return the results as JSON
   return new NextResponse(JSON.stringify(results), {
     headers: {

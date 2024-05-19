@@ -7,7 +7,7 @@ type SearchSectionsBarProps = {
 
 const SearchSectionsBar = ({ user, handleCategoryClick }: SearchSectionsBarProps) => (
   <div className="inline-flex justify-between h-32 w-full border-primary border-b-2 px-12">
-    {user && user.id ? (
+    {user && user.id !="" ? (
       <button
         onClick={() => handleCategoryClick("Your Library")}
         className="bg-primary w-[10%] px-2 my-8 rounded-xl focus:outline-none focus:ring-4"

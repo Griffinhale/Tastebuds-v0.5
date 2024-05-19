@@ -5,10 +5,9 @@ import useState from "react-usestateref"; // Import custom useState hook that pr
 import { useUser } from "../../contexts/UserContext";
 import supabase from "../../utils/supabaseClient"; // Import supabase client for database interactions
 import * as DOMPurify from "dompurify"; // Import DOMPurify for sanitizing HTML to prevent XSS attacks
-import extractDataFromCookie from "../../utils/extractCookie"; // Import function to extract data from cookies
 import toast from "react-hot-toast";
 import DetailsCoverCard from "./DetailsCoverCard";
-
+import { useExpandedItemDetails } from "../../contexts/ExpandedItemDetailsContext";
 interface Params {
   params: [string, string];
 }
@@ -19,6 +18,7 @@ const BookDetails: React.FC<Params> = ({ params }) => {
   const [results, setResults, resultsRef] = useState<any>([]); // State to hold book details
   const [isLoading, setIsLoading, isLoadingRef] = useState(true); // State to track loading status
   const { user } = useUser(); // Use the context for user authentication
+  const { itemDetails } = useExpandedItemDetails();
   let dimensionStr: string = ""; // Variable for formatting book dimensions
 
 
