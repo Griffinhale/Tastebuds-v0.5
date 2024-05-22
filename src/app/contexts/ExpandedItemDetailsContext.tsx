@@ -35,6 +35,7 @@ export const ExpandedItemDetailsProvider = ({ children }: { children: ReactNode 
 
   const setItemDetails = (details: ItemDetails) => {
     setItemDetailsState(details);
+    console.log(details);
   };
 
   const clearItemDetails = () => {

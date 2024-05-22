@@ -16,7 +16,7 @@ type UserContextType = {
 };
 
 const defaultGuestUser: User = {
-  id: 'guest',
+  id: '',
   name: 'Guest',
   email: '',
 };

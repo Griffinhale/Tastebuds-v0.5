@@ -59,12 +59,7 @@ const SearchResults = () => {
   const termCheck = params.get("term");
 
   useEffect(() => {
-    const wipeResults = async () => {
-      setResults([]);
-      console.log("wiping results");
-    };
-
-    wipeResults();
+    setResults([]);
     const newTerm = termCheck || "default search term";
     if (term !== newTerm) {
       console.log("changed term");
@@ -87,6 +82,7 @@ const SearchResults = () => {
   }, [category, search, setCategory, setIsLoading, setPage, term, user]);
 
   const handleCategoryClick = useCallback((category: string) => {
+    console.log(category);
     setPage(1);
     setResults([]);
     setCategory(category);
