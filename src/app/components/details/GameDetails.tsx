@@ -6,6 +6,7 @@ import supabase from "../../utils/supabaseClient";
 import {useUser} from "../../contexts/UserContext";
 import DetailsCoverCard from "./DetailsCoverCard";
 import { useExpandedItemDetails } from "../../contexts/ExpandedItemDetailsContext";
+import DetailsDescriptionCard from "./DetailsDescriptionCard";
 
 
 interface Params {
@@ -57,6 +58,7 @@ const GameDetails: React.FC<Params> = ({ params }) => {
       data[0].api_id = data[0].id;
       data[0].id = params[1];
       data[0].type = params[0];
+      data[0].description = data[0].summary || "";
       if (data[0].companyData.length == 0) {
         data[0].creator = "Unknown";
       } else {
@@ -86,9 +88,7 @@ const GameDetails: React.FC<Params> = ({ params }) => {
           <div className="p-16 space-x-2 flex 2xl:flex-row flex-col justify-between text-black">
             <DetailsCoverCard/>
             <div className="w-4/5 p-4">
-              <p className="whitespace-pre-line">
-                {resultsRef.current.summary}
-              </p>
+              <DetailsDescriptionCard/>
             </div>
             <div className="flex-col flex justify-between w-4/5 p-4">
               <div></div>

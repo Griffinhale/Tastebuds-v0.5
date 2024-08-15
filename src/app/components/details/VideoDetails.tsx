@@ -15,6 +15,7 @@ import supabase from "../../utils/supabaseClient";
 import { useExpandedItemDetails } from "../../contexts/ExpandedItemDetailsContext";
 
 import DetailsCoverCard from "./DetailsCoverCard";
+import DetailsDescriptionCard from "./DetailsDescriptionCard";
 
 interface Params {
   params: [string, string];
@@ -64,6 +65,7 @@ const VideoDetails: React.FC<Params> = ({ params }) => {
       let data = await response.json();
       data.video_type = videoDetails![0].video_type;
       data.type = data.video_type;
+      data.description = data.overview || "";
       if (data.credits && !data.creator) {
         data.creator = data.credits.crew.l
           ? data.credits.crew[0].name
@@ -92,9 +94,7 @@ const VideoDetails: React.FC<Params> = ({ params }) => {
             <div className="p-16 space-x-2 flex 2xl:flex-row flex-col justify-between border-primary text-black">
               <DetailsCoverCard/>
               <div className="w-4/5 p-4">
-                <p className="whitespace-pre-line">
-                  {resultsRef.current.overview}
-                </p>
+                <DetailsDescriptionCard/>
               </div>
               <div className="flex-col flex justify-between w-4/5 p-4">
                 <div>
@@ -160,9 +160,7 @@ const VideoDetails: React.FC<Params> = ({ params }) => {
             <div className="p-16 space-x-2 flex 2xl:flex-row flex-col justify-between text-black">
               <DetailsCoverCard/>
               <div className=" w-4/5 p-4">
-                <p className="whitespace-pre-line">
-                  {resultsRef.current.overview}
-                </p>
+                <DetailsDescriptionCard/>
               </div>
               <div className="flex-col flex justify-between w-4/5 p-4">
                 <div>

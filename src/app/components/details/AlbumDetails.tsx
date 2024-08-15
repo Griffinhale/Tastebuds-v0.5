@@ -79,6 +79,7 @@ const AlbumDetails: React.FC<Params> = ({ params }) => {
         data[0].type = params[0];
         if (data[0].album.wiki){
           setShowDescription(true);
+          data[0].description = data[0].album.wiki;
         }
         setResults(data[0]);
         setItemDetails(data[0]);

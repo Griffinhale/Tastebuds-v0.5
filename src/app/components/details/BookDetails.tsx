@@ -7,6 +7,7 @@ import supabase from "../../utils/supabaseClient"; // Import supabase client for
 import DOMPurify from "dompurify"; // Import DOMPurify for sanitizing HTML to prevent XSS attacks
 import DetailsCoverCard from "./DetailsCoverCard";
 import { useExpandedItemDetails } from "../../contexts/ExpandedItemDetailsContext";
+import DetailsDescriptionCard from "./DetailsDescriptionCard";
 interface Params {
   params: [string, string];
 }
@@ -103,7 +104,7 @@ const BookDetails: React.FC<Params> = ({ params }) => {
       );
       const data = await response.json();
       // Normalize properties for components
-      data.volumeInfo.description = {
+      data.description = {
         __html: DOMPurify.sanitize(data.volumeInfo.description),
       };
       data.cover = bookDetails![0].cover;
@@ -140,12 +141,7 @@ const BookDetails: React.FC<Params> = ({ params }) => {
               
               {/*description*/}
               <div className="p-24">
-                <p
-                  className="whitespace-pre-line"
-                  dangerouslySetInnerHTML={
-                    resultsRef.current.volumeInfo.description
-                  }
-                ></p>
+                <DetailsDescriptionCard/>
               </div>
             </div>
 

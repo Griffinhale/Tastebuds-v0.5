@@ -7,6 +7,7 @@ interface ItemDetails {
   cover: string;
   creator: string;
   subtitle?: string;
+  description?: any;
   [key: string]: any; // Additional properties for different media types
 }
 
