@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import extractDataFromCookie from "../../utils/extractCookie";
 import useState from "react-usestateref";
 
 //show all lists, most popular lists, most recent lists, etc.
@@ -9,17 +8,6 @@ const ListBrowser = () => {
   const [lastList, setLastList, lastListRef] = useState(0);
   const [fetchAmount, setFetchAmount, fetchAmountRef] = useState(20);
 
-  // Extract user data from cookie
-  useEffect(() => {
-    const data = extractDataFromCookie();
-    if (data) {
-      setUserId(data.userId);
-    } else {
-      console.log("auth_data not found in cookie");
-      setUserId("");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   //fetch lists
   useEffect(() => {
