@@ -1,8 +1,13 @@
 "use client";
 import SearchResults from '../components/search/SearchResults';
+import { Suspense } from 'react';
 
 const SearchPage = () => {
-  return <SearchResults />;
+  return (
+  <Suspense>
+    <SearchResults />
+  </Suspense>
+  );
 };
 
 export default SearchPage;
