@@ -11,6 +11,8 @@ import toast from "react-hot-toast";
 import { useUser } from "../../contexts/UserContext";
 import DetailsCoverCard from "./DetailsCoverCard";
 import DetailsDescriptionCard from "./DetailsDescriptionCard";
+import { useExpandedItemDetails } from "../../contexts/ExpandedItemDetailsContext";
+
 
 
 interface Params {
@@ -29,6 +31,7 @@ const AlbumDetails: React.FC<Params> = ({ params }) => {
   const [cover, setCover, coverRef] = useState(""); // Stores album cover URL
   const { user } = useUser(); // Use the context for user authentication
   const [showDescription, setShowDescription, showDescriptionRef] = useState(false); //
+  const { itemDetails, setItemDetails, clearItemDetails } = useExpandedItemDetails();
 
   // A function to handle album type selection logic (currently empty)
   /*function selectAlbumType() {
@@ -78,6 +81,7 @@ const AlbumDetails: React.FC<Params> = ({ params }) => {
           setShowDescription(true);
         }
         setResults(data[0]);
+        setItemDetails(data[0]);
         setIsLoading(false);
         return data;
       } 

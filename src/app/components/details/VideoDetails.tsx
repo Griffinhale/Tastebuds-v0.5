@@ -12,6 +12,7 @@ import {
 import {useUser} from "../../contexts/UserContext";
 import useState from "react-usestateref";
 import supabase from "../../utils/supabaseClient";
+import { useExpandedItemDetails } from "../../contexts/ExpandedItemDetailsContext";
 
 import DetailsCoverCard from "./DetailsCoverCard";
 
@@ -26,6 +27,8 @@ const VideoDetails: React.FC<Params> = ({ params }) => {
   const [isLoading, setIsLoading, isLoadingRef] = useState(true);
   const [cover, setCover] = useState("");
   const {user} = useUser();
+  const { itemDetails, setItemDetails, clearItemDetails } = useExpandedItemDetails();
+
 
  
 
@@ -39,7 +42,7 @@ const VideoDetails: React.FC<Params> = ({ params }) => {
         .select("*")
         .eq("id", item_id);
 
-      setCover(videoDetails![0].cover); // Set cover image
+      
 
       // Prepare data for additional details fetch
       const bodyData = {
@@ -69,9 +72,11 @@ const VideoDetails: React.FC<Params> = ({ params }) => {
         data.creator = "Unknown";
       }
       setResults(data); // Set the results state
+      setItemDetails(data);
       setIsLoading(false); // Set loading to false
     }
     getVideoDetails(params[1]);
+    console.log(cover);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]); // Rerun this effect when params state changes
 

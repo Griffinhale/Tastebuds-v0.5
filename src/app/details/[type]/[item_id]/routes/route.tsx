@@ -37,7 +37,7 @@ async function getTwitchKeys() {
 // API route to handle POST requests
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const {setItemDetails} = useExpandedItemDetails();
+ // const {setItemDetails} = useExpandedItemDetails();
   let results;
   // Switch case to handle different types of media
   switch(body.type) {
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     case "video": results = await handleVideoDetails(body); break;
     default: console.error("type of media missing");
   }
-  setItemDetails(results)
+  //setItemDetails(results)
   // Return the results as JSON
   return new NextResponse(JSON.stringify(results), {
     headers: {
@@ -179,6 +179,6 @@ async function handleVideoDetails(body: any) {
   // Fetch video details
   const response = await fetch(searchURL, options);
   const data = await response.json();
-  console.log(data);
+  data.cover = "https://image.tmdb.org/t/p/original" + data.poster_path; // Set cover imagedata
   return data;
 }

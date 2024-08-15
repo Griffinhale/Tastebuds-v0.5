@@ -17,7 +17,8 @@ const BookDetails: React.FC<Params> = ({ params }) => {
   const [results, setResults, resultsRef] = useState<any>([]); // State to hold book details
   const [isLoading, setIsLoading, isLoadingRef] = useState(true); // State to track loading status
   const { user } = useUser(); // Use the context for user authentication
-  const { itemDetails } = useExpandedItemDetails();
+  const { itemDetails, setItemDetails, clearItemDetails } = useExpandedItemDetails();
+
   let dimensionStr: string = ""; // Variable for formatting book dimensions
 
 
@@ -113,6 +114,7 @@ const BookDetails: React.FC<Params> = ({ params }) => {
       data.id = params[1];
       data.type = params[0];
       setResults(data);
+      setItemDetails(data);
       setIsLoading(false);
     }
     // Execute the function to fetch book details

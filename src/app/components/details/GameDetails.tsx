@@ -5,6 +5,8 @@ import useState from "react-usestateref";
 import supabase from "../../utils/supabaseClient";
 import {useUser} from "../../contexts/UserContext";
 import DetailsCoverCard from "./DetailsCoverCard";
+import { useExpandedItemDetails } from "../../contexts/ExpandedItemDetailsContext";
+
 
 interface Params {
   params: [string, string];
@@ -17,6 +19,8 @@ const GameDetails: React.FC<Params> = ({ params }) => {
   const [isLoading, setIsLoading, isLoadingRef] = useState(true);
   const [cover, setCover, coverRef] = useState("");
   const {user} = useUser();
+  const { itemDetails, setItemDetails, clearItemDetails } = useExpandedItemDetails();
+
 
 
   // Fetch further game details on component mount
@@ -46,7 +50,7 @@ const GameDetails: React.FC<Params> = ({ params }) => {
       );
       const data = await response.json();
 
-      // Set the results and update loading state
+      // Format results (should be on server)
       data[0].cover = coverRef.current;
       console.log(data[0].cover)
       data[0].title = data[0].name;
@@ -59,7 +63,9 @@ const GameDetails: React.FC<Params> = ({ params }) => {
         data[0].creator = data[0].companyData[0].name;
       }
 
+      // Update State
       setResults(data[0]);
+      setItemDetails(data[0]);
       setIsLoading(false);
       return data;
     }
