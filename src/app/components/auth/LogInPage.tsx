@@ -1,14 +1,13 @@
 import { useEffect } from "react";
-import Header from "./Header";
-import supabase from "../utils/supabaseClient";
+import Header from "../common/Header";
 import { useRouter } from "next/navigation";
-import extractDataFromCookie from "../utils/extractCookie";
-import useState from "react-usestateref";
+import { useUser } from "../../contexts/UserContext";
 
 // Define a component for the login page
 const LogInPage = () => {
   const router = useRouter();
-  const [userId, setUserId, userIdRef] = useState("");
+  const { user, login } = useUser(); // Use the context for user authentication
+
 
   // Function to handle user sign up
   const handleSignup = async (e: any) => {
@@ -26,7 +25,7 @@ const LogInPage = () => {
     });
 
     // Send a POST request to the server to handle the signup
-    const res = await fetch("http://localhost:3000/login/routes", {
+    const res = await fetch("/api/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -34,13 +33,23 @@ const LogInPage = () => {
       body: body,
     });
     const data = await res.json(); // Parse the response
-    console.log(data); // Log the response data for debugging
-    location.reload();
-    router.push("/");
+    if (data.status === 200) {
+      const userData = {
+        id: data.data.userId,
+        name: data.data.screenName,
+        email: formData.get("email") as string,
+      };
+      login(userData, data.data.token); // Login the user using the context
+      router.push("/");
+    } else {
+      console.error('Signup failed:', data.error);
+    }
   };
 
   // Function to handle user login
   const handleLogin = async (e: any) => {
+    e.preventDefault(); // Prevent the default form submission behavior
+
     // Get form data
     const form = e.target;
     const formData = new FormData(form);
@@ -52,7 +61,7 @@ const LogInPage = () => {
     });
 
     // Send a POST request to the server to handle the login
-    const res = await fetch("http://localhost:3000/login/routes", {
+    const res = await fetch("/api/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -60,28 +69,25 @@ const LogInPage = () => {
       body: body,
     });
     const data = await res.json(); // Parse the response
-    console.log(data.data.session); // Log the session data for debugging
-    location.reload();
+    if (data.status === 200) {
+      const userData = {
+        id: data.data.userId,
+        name: data.data.screenName,
+        email: formData.get("email") as string,
+      };
+      login(userData, data.data.token); // Login the user using the context
+      router.push("/");
+    } else {
+      console.error('Login failed:', data.error);
+    }
   };
 
   // useEffect hook to check the login status when the component mounts
   useEffect(() => {
-    async function checkLogin() {
-      // Use Supabase client to check the current session
-      const data = extractDataFromCookie();
-      if (data) {
-        setUserId(data.userId); // Set user ID from extracted data
-      } else {
-        console.log("auth_data not found in cookie");
-        setUserId(""); // Clear user ID if auth data not found
-      }
-      if (userIdRef.current !== "") {
-        router.push("/");
-      }
+    if (user && user.id) {
+      router.push("/");
     }
-
-    checkLogin(); // Call the checkLogin function
-  }, []); // Missing dependency array, which might cause this effect to run on every re-render
+  }, [user, router]);
 
   return (
     <div className="flex flex-col h-4/5 min-h-[1200px] w-full rounded-xl text-primary">
@@ -156,7 +162,7 @@ const LogInPage = () => {
             <br />
             <input autoComplete="off" name="email" type="email"></input>
             <br />
-            <label htmlFor="password" >Password</label>
+            <label htmlFor="password">Password</label>
             <br />
             <input autoComplete="current-password" name="password" type="password"></input>
             <br />
