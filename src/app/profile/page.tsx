@@ -1,8 +1,8 @@
-/*"use client";
-import ProfilePage from "../components/profile/ProfilePage";
+"use client";
+//import ProfilePage from "../components/profile/ProfilePage";
 
 const Profile = () => {
-  return <ProfilePage />;
+  return;
 };
 
-export default Profile;*/
+export default Profile;
