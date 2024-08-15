@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useEffect, useRef, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useUser } from "../../contexts/UserContext";
 import { useSearch } from "../../contexts/SearchContext";
@@ -92,30 +92,32 @@ const SearchResults = () => {
   return (
     <div className="flex flex-col h-4/5 min-h-[1200px] w-full rounded-xl text-primary">
       <Header />
-      <div className="bg-primary/80 border-t-8 border-primary px-8 py-8 mt-1 rounded-xl text-black">
-        <div className="border-b-2 h-auto border-primary rounded-xl">
-          <div className="flex-row flex">
-            <h1 className="font-bold text-xl pb-4 ml-4">
-              Results for &quot;{term}&quot;
-            </h1>
-          </div>
-        </div>
-        <SearchCategoryButtons user={user} handleCategoryClick={handleCategoryClick} />
-        {user && !user.id && category === "Your Library" ? (
-          <div className="flex justify-center mt-8">
-            User not logged in. Please select media format to search through or log in to search library.
-          </div>
-        ) : (
-          <SearchResultsGrid endOfResults={endOfResults} />
-        )}
-        {endOfResults && results.length === 0 && (
-          <div>
-            <div className="flex justify-center mt-8">
-              No results found. Try a different search term or choose a different media format.
+      <Suspense>
+        <div className="bg-primary/80 border-t-8 border-primary px-8 py-8 mt-1 rounded-xl text-black">
+          <div className="border-b-2 h-auto border-primary rounded-xl">
+            <div className="flex-row flex">
+              <h1 className="font-bold text-xl pb-4 ml-4">
+                Results for &quot;{term}&quot;
+              </h1>
             </div>
           </div>
-        )}
-      </div>
+          <SearchCategoryButtons user={user} handleCategoryClick={handleCategoryClick} />
+          {user && !user.id && category === "Your Library" ? (
+            <div className="flex justify-center mt-8">
+              User not logged in. Please select media format to search through or log in to search library.
+            </div>
+          ) : (
+            <SearchResultsGrid endOfResults={endOfResults} />
+          )}
+          {endOfResults && results.length === 0 && (
+            <div>
+              <div className="flex justify-center mt-8">
+                No results found. Try a different search term or choose a different media format.
+              </div>
+            </div>
+          )}
+        </div>
+      </Suspense>
     </div>
   );
 };
